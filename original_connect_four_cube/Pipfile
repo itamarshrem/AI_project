@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+pytest-cov = "*"
+flake8 = "*"
+vpython = "*"
+
+[packages]
+coloredlogs = "*"
+adafruit-circuitpython-neopixel = "*"
+"rpi.gpio" = "*"
+gpiozero = "*"
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+install-rpi = "pip install rpi-ws281x"

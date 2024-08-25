@@ -1,0 +1,13 @@
+[Unit]
+Description=Run connect4cube after startup and keep restarting it when it stops.
+After=multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=/home/pi/connect4cube
+ExecStart=sudo pipenv run python3 -m connect4cube
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
