@@ -1,48 +1,30 @@
-import numpy as np
-import pygame
-from Constants import Constants
-import math
-import sys
 import abc
-from EvaluationFunctions import simple_evaluation_function, complex_evaluation_function
+from evaluation_functions import *
+
 
 class Player:
-    def __init__(self, index, color):
-        self.index = index
-        self.color = color
+    MIN_SCORE = -np.inf, -np.inf
+    MAX_SCORE = np.inf, np.inf
 
-    def get_action(self, board, screen=None):
+    def __init__(self, index):
+        self.index = index
+
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
         raise NotImplementedError()
 
 
 class RandomPlayer(Player):
-    def get_action(self, board, screen=None):
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
         legal_actions = board.get_legal_actions()
         return legal_actions[np.random.choice(len(legal_actions))]
 
 
 class HumanPlayer(Player):
-
-    def get_action(self, board, screen=None):
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-
-                if event.type == pygame.MOUSEMOTION:
-                    pygame.draw.rect(screen, Constants.BLACK, (0, 0, Constants.width, Constants.SQUARESIZE))
-                    posx = event.pos[0]
-                    pygame.draw.circle(screen, self.color, (posx, int(Constants.SQUARESIZE / 2)), Constants.RADIUS)
-                pygame.display.update()
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.draw.rect(screen, Constants.BLACK, (0, 0, Constants.width, Constants.SQUARESIZE))
-                    # print(event.pos)
-                    posx = event.pos[0]
-                    col = int(math.floor(posx / Constants.SQUARESIZE))
-                    location = np.array([col, 0]) # depth is always 0 for the human player
-                    if board.is_valid_location(location):
-                        return location
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
+        player_input = ui.get_player_input(self.index)
+        while not board.is_valid_location(player_input):
+            player_input = ui.get_player_input(self.index)
+        return player_input
 
 
 class MultiAgentSearchAgent(Player):
@@ -60,27 +42,25 @@ class MultiAgentSearchAgent(Player):
     is another abstract class.
     """
 
-    def __init__(self, index, color, evaluation_function=None, depth=2):
-        super(MultiAgentSearchAgent, self).__init__(index, color)
+    def __init__(self, index, evaluation_function=None, depth=2):
+        super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
         self.depth = depth
-        if self.index == 1:
-            self.MAX_PLAYER = 1
-            self.MIN_PLAYER = 2
-        else:
-            self.MAX_PLAYER = 2
+        if self.index == 0:
+            self.MAX_PLAYER = 0
             self.MIN_PLAYER = 1
+        else:
+            self.MAX_PLAYER = 1
+            self.MIN_PLAYER = 0
 
     @abc.abstractmethod
-    def get_action(self, game_state):
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
         return
 
 
 class MinmaxAgent(MultiAgentSearchAgent):
-    MAX_PLAYER = 0
-    MIN_PLAYER = 1
 
-    def get_action(self, game_state):
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
@@ -97,39 +77,39 @@ class MinmaxAgent(MultiAgentSearchAgent):
         game_state.generate_successor(agent_index, action):
             Returns the successor game state after an agent takes an action
         """
-        legal_actions = game_state.get_legal_actions(self.MAX_PLAYER)
+        legal_actions = board.get_legal_actions()
         if self.depth == 0 or not legal_actions:
             return None
-        max_value_found = -np.inf
+        max_value_found = self.MIN_SCORE
         action_for_max_value = None
         for action in legal_actions:
-            successor = game_state.generate_successor(self.MAX_PLAYER, location=action)
-            successor_value = self.__min_player(successor, self.depth - 1)
+            successor = board.generate_successor(self.MAX_PLAYER, location=action)
+            successor_value = self.__min_player(successor, self.depth - 1, winning_streak)
             if successor_value > max_value_found:
                 max_value_found = successor_value
                 action_for_max_value = action
         return action_for_max_value
 
-    def __min_player(self, cur_state, cur_depth):
-        legal_actions = cur_state.get_legal_actions(self.MIN_PLAYER)
+    def __min_player(self, cur_state, cur_depth, winning_streak):
+        legal_actions = cur_state.get_legal_actions()
         if cur_depth == 0 or not legal_actions:
-            return self.evaluation_function(cur_state, self.MIN_PLAYER)
-        min_value_found = np.inf
+            return self.evaluation_function(cur_state, self.MAX_PLAYER, self.MIN_PLAYER, winning_streak)
+        min_value_found = self.MAX_SCORE
         for action in legal_actions:
             successor = cur_state.generate_successor(self.MIN_PLAYER, location=action)
-            successor_value = self.__max_player(successor, cur_depth)
+            successor_value = self.__max_player(successor, cur_depth, winning_streak)
             if successor_value < min_value_found:
                 min_value_found = successor_value
         return min_value_found
 
-    def __max_player(self, cur_state, cur_depth):
-        legal_actions = cur_state.get_legal_actions(self.MAX_PLAYER)
+    def __max_player(self, cur_state, cur_depth, winning_streak):
+        legal_actions = cur_state.get_legal_actions()
         if cur_depth == 0 or not legal_actions:
-            return self.evaluation_function(cur_state, self.MAX_PLAYER)
-        max_value_found = -np.inf
+            return self.evaluation_function(cur_state, self.MAX_PLAYER, self.MIN_PLAYER, winning_streak)
+        max_value_found = self.MIN_SCORE
         for action in legal_actions:
             successor = cur_state.generate_successor(self.MAX_PLAYER, location=action)
-            successor_value = self.__min_player(successor, cur_depth - 1)
+            successor_value = self.__min_player(successor, cur_depth - 1, winning_streak)
             if successor_value > max_value_found:
                 max_value_found = successor_value
         return max_value_found
@@ -139,30 +119,27 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
     """
-    MAX_PLAYER = 0
-    MIN_PLAYER = 1
 
-    def get_action(self, game_state):
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        action, value = self.__alphabeta_helper(game_state, 0, 0, -np.inf, np.inf)
-        # print(f"alphabeta value is: {value}")
+        action, value = self.__alphabeta_helper(board, self.MAX_PLAYER, 0, self.MIN_SCORE, self.MAX_SCORE, winning_streak)
         return action
 
-    def __alphabeta_helper(self, cur_state, cur_player, cur_depth, a, b):
+    def __alphabeta_helper(self, cur_state, cur_player, cur_depth, a, b, winning_streak):
         legal_actions = cur_state.get_legal_actions(cur_player)
         if cur_depth == self.depth or not legal_actions:
-            return None, self.evaluation_function(cur_state)
+            return None, self.evaluation_function(cur_state, self.MAX_PLAYER, self.MIN_PLAYER, winning_streak)
         if cur_player == self.MAX_PLAYER:
-            return self.__max_helper(cur_state, cur_player, cur_depth, a, b, legal_actions)
-        return self.__min_helper(cur_state, cur_player, cur_depth, a, b, legal_actions)
+            return self.__max_helper(cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak)
+        return self.__min_helper(cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak)
 
-    def __max_helper(self, cur_state, cur_player, cur_depth, a, b, legal_actions):
+    def __max_helper(self, cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak):
         max_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action)
-            _, new_a = self.__alphabeta_helper(successor, 1 - cur_player, cur_depth + cur_player, a, b)
+            _, new_a = self.__alphabeta_helper(successor, 1 - cur_player, cur_depth + cur_player, a, b, winning_streak)
             if new_a > a:
                 a = new_a
                 max_action = action
@@ -170,11 +147,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 break
         return max_action, a
 
-    def __min_helper(self, cur_state, cur_player, cur_depth, a, b, legal_actions):
+    def __min_helper(self, cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak):
         min_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action)
-            _, new_b = self.__alphabeta_helper(successor, 1 - cur_player, cur_depth + cur_player, a, b)
+            _, new_b = self.__alphabeta_helper(successor, 1 - cur_player, cur_depth + cur_player, a, b, winning_streak)
             if new_b < b:
                 b = new_b
                 min_action = b
@@ -183,27 +160,28 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return min_action, b
 
 
-
 class PlayerFactory:
     @staticmethod
     def get_player(player_type, index, evaluation_function_name="", depth=2):
-        color = Constants.PLAYER_COLORS[index - 1]
-        evaluation_function = PlayerFactory().get_evaluation_function(evaluation_function_name)
+        evaluation_function = PlayerFactory.get_evaluation_function(evaluation_function_name)
         if player_type == "random":
-            return RandomPlayer(index, color)
+            return RandomPlayer(index)
         elif player_type == "human":
-            return HumanPlayer(index, color)
+            return HumanPlayer(index)
         elif player_type == "minmax":
-            return MinmaxAgent(index, color, evaluation_function, depth)
+            return MinmaxAgent(index, evaluation_function, depth)
         elif player_type == "alpha_beta":
-            return AlphaBetaAgent(index, color)
+            return AlphaBetaAgent(index)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
-    def get_evaluation_function(self, evaluation_function):
+    @staticmethod
+    def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
-            return simpleEvaluationFunction
+            return simple_evaluation_function
         elif evaluation_function == "complex":
-            return complexEvaluationFunction
+            return complex_evaluation_function
+        elif evaluation_function == "all_complex":
+            return all_complex_evaluation_function
         else:
             return None
