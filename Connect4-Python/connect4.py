@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+import time
 import pygame
 from game import Game
 from player import PlayerFactory
@@ -11,8 +12,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     default_players_num = 2
     parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[5, 7, 1], help='size of the board')
-    parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num, choices=["human", "random", "minmax", "alpha_beta"], help='human, random')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["None"] * default_players_num, type=str, choices=["simple", "complex", "all_complex", "None"], help='simple, complex, None')
+    parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num, choices=["human", "random", "minmax", "alpha_beta", "rl_agent"], help='human, random')
+    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "complex", "all_complex", "none"], help='simple, complex, None')
     parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
     parser.add_argument('-ws', '--winning_streak', type=int, default=4, help='Number of consecutive pieces to win')
     parser.add_argument('-s', '--sleep', action='store_true', help='Sleep between actions')
@@ -34,7 +35,7 @@ def create_players(args):
     players = []
     player_index = 0
     for player_type in args.players:
-        players.append(PlayerFactory.get_player(player_type, player_index, args.eval_functions[player_index], args.depths[player_index]))
+        players.append(PlayerFactory.get_player(player_type, player_index, args.board_shape, args.eval_functions[player_index], args.depths[player_index]))
         player_index += 1
     return players
 
@@ -49,10 +50,12 @@ def print_results(results, num_of_games):
 def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape):
     results = defaultdict(lambda: 0)
     for i in range(num_of_games):
+        # save time
+        start_time = time.time()
         game_result = game.run(display_screen, board_configuration, board_shape)
-        pygame.time.wait(3000)
         results[game_result] += 1
         print(f"game {i+1}: player {game_result} won!! ")
+        print(f"game {i+1}: time taken: {time.time() - start_time} seconds")
     print_results(results, num_of_games)
 
 

@@ -36,6 +36,7 @@ class UI:
         label = self.myfont.render(text, 1, Color.RED)
         self.screen.blit(label, (40, 10))
         pygame.display.update()
+        pygame.time.wait(3000)
 
     def display_board(self, board):
         print(board)

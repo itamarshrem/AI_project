@@ -1,9 +1,9 @@
 import time
 import numpy as np
-from scipy.signal import convolve
+# from scipy.signal import convolve
 from initial_boards import BoardFactory
 from user_interface import UIFactory
-from winning_patterns import WinningPatterns
+# from winning_patterns import WinningPatterns
 
 
 class Game:
@@ -52,18 +52,4 @@ class Game:
         return self.TIE
 
     def winning_move(self, current_player, disc_location):
-        # Convolve the board with each kernel and check if any result contains self.winning_streak
-        x, y, z = disc_location
-        slicing = (
-            slice(max(x - (self.winning_streak - 1), 0), min(x + self.winning_streak, self.board.rows)),
-            slice(max(y - (self.winning_streak - 1), 0), min(y + self.winning_streak, self.board.cols)),
-            slice(max(z - (self.winning_streak - 1), 0), min(z + self.winning_streak, self.board.depth))
-        )
-        board = self.board.board[slicing]
-        for kernel in WinningPatterns.PATTERNS:
-            if self.board.depth == 1 and kernel.shape[2] > 1:
-                continue
-            convolved = convolve((board == current_player.index).astype(int), kernel, mode='valid')
-            if np.any(convolved == self.winning_streak):
-                return True
-        return False
+        return self.board.winning_move(current_player.index, disc_location, self.winning_streak)

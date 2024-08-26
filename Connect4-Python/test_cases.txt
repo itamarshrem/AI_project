@@ -4,5 +4,7 @@ in each test, check win rate and running time
 2. run with different number of agents
 3. run 2 minimax agents, each with different searching depth tree
 4. check minmax with the simpler heuristic
+5. compare run times with previous noobs work.
+6. run connect 4 3d(?)
 
 
