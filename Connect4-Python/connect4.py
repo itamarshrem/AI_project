@@ -39,11 +39,11 @@ def create_players(args):
     return players
 
 
-def print_results(results):
+def print_results(results, num_of_games):
     for player, count in results.items():
         if player == Game.TIE:
-            print(f"number of ties: {count}")
-        print(f"player {player} won {count} games")
+            print(f"number of ties: {count}, tie percentage: {(count * 100 / num_of_games)}%")
+        print(f"player {player} won {count} games, winning percentage: {count * 100 / num_of_games}%")
 
 
 def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape):
@@ -52,7 +52,8 @@ def run_all_games(num_of_games, game, display_screen, board_configuration, board
         game_result = game.run(display_screen, board_configuration, board_shape)
         pygame.time.wait(3000)
         results[game_result] += 1
-    print_results(results)
+        print(f"game {i+1}: player {game_result} won!! ")
+    print_results(results, num_of_games)
 
 
 if __name__ == '__main__':
