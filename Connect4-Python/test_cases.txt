@@ -6,5 +6,6 @@ in each test, check win rate and running time
 4. check minmax with the simpler heuristic
 5. compare run times with previous noobs work.
 6. run connect 4 3d(?)
+7. need to document that when we run minmax/alpha_beta with 3 agents, we get better results when the board is bigger
 
 

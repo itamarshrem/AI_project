@@ -1,6 +1,8 @@
 import abc
 import random
 
+import numpy as np
+
 from evaluation_functions import *
 
 
@@ -72,7 +74,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
             return None
         max_value_found = self.MIN_SCORE
         action_for_max_value = None
-        next_player_index = (self.index + 1) % num_of_players
+        next_player_index = self.get_next_player(self.index, num_of_players)
         for action in legal_actions:
             successor = board.generate_successor(self.index, location=action)
             successor_value = self.__min_player2(successor, self.depth, num_of_players, next_player_index, winning_streak)
@@ -86,7 +88,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
         if cur_depth == 0 or not legal_actions:
             return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         min_value_found = self.MAX_SCORE
-        next_player_index = (cur_player_idx + 1) % num_of_players
+        next_player_index = self.get_next_player(cur_player_idx, num_of_players)
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player_idx, location=action)
             if next_player_index == self.index:
@@ -102,9 +104,10 @@ class MinmaxAgent(MultiAgentSearchAgent):
         if cur_depth == 0 or not legal_actions:
             return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         max_value_found = self.MIN_SCORE
-        next_player_index = (self.index + 1) % num_of_players
+        next_player_index = self.get_next_player(self.index, num_of_players)
         for action in legal_actions:
             successor = cur_state.generate_successor(self.index, location=action)
+            # todo verify that when we merge we don't decrease depth by 1:
             successor_value = self.__min_player2(successor, cur_depth - 1, num_of_players, next_player_index, winning_streak)
             if successor_value > max_value_found:
                 max_value_found = successor_value
@@ -112,9 +115,6 @@ class MinmaxAgent(MultiAgentSearchAgent):
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
-    """
-    Your minimax agent with alpha-beta pruning (question 3)
-    """
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         """
@@ -154,6 +154,86 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if b <= a:
                 break
         return min_action, b
+
+class ExpectimaxAgent(MultiAgentSearchAgent):
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
+        legal_actions = board.get_legal_actions(winning_streak)
+        if self.depth == 0 or not legal_actions:
+            return None
+        max_value_found = self.MIN_SCORE
+        action_for_max_value = None
+        next_player_index = self.get_next_player(self.index, num_of_players)
+        for action in legal_actions:
+            successor = board.generate_successor(self.index, location=action)
+            successor_value = self.__expecty_player(successor, self.depth, num_of_players, next_player_index, winning_streak)
+            if successor_value > max_value_found or action_for_max_value is None:
+                max_value_found = successor_value
+                action_for_max_value = action
+        return action_for_max_value
+
+    @staticmethod
+    def handle_infinity(successors_vals):
+        inf_mask = np.isposinf(successors_vals[:, 0])
+        neg_inf_mask = np.isneginf(successors_vals[:, 0])
+        count_inf = np.sum(inf_mask)
+        count_neg_inf = np.sum(neg_inf_mask)
+        if count_inf > count_neg_inf:
+            return np.inf, np.sum(successors_vals[inf_mask][:, 1])
+        elif count_inf < count_neg_inf:
+            return -np.inf, np.sum(successors_vals[neg_inf_mask][:, 1])
+        return 0, 0
+    @staticmethod
+    def calc_expected_val(successors_vals, winning_streak):
+        successors_vals = np.array(successors_vals)
+        if np.any(np.isinf(successors_vals[:, 0])):
+            return ExpectimaxAgent.handle_infinity(successors_vals)
+        signs_of_vals = np.sign(successors_vals)
+        abs_vals = np.abs(successors_vals)
+
+
+        non_zero_mask = successors_vals[:, 0] != 0
+        successors_vals[non_zero_mask, 0] = np.sign(successors_vals[non_zero_mask, 0]) * np.log2(np.abs(successors_vals[non_zero_mask, 0]))
+        successors_vals[successors_vals[:, 0] == winning_streak + SAFETY_MARGIN, 0] -= SAFETY_MARGIN
+        sum_of_streaks = np.sum(successors_vals[:, 0])
+        streaks = successors_vals[:, 0]
+        streak_lengths = successors_vals[:, 1]
+        weighted_lengths_of_streaks = np.dot(streaks, streak_lengths)
+        res2 = 0
+        if sum_of_streaks != 0:
+            res2 = weighted_lengths_of_streaks / sum_of_streaks
+        successors_vals[successors_vals[:, 0] == winning_streak , 0] += SAFETY_MARGIN
+        return np.sign(sum_of_streaks) * 2**(abs(sum_of_streaks)/len(successors_vals)), res2
+
+    def __expecty_player(self, cur_state, cur_depth, num_of_players, cur_player_idx, winning_streak):
+        legal_actions = cur_state.get_legal_actions(winning_streak)
+        if cur_depth == 0 or not legal_actions:
+            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
+        cum_streak_lengths, cum_weighted_streaks, num_of_successors = 0, 0 , 0
+        successors_vals = []
+        next_player_index = self.get_next_player(cur_player_idx, num_of_players)
+        for action in legal_actions:
+            successor = cur_state.generate_successor(cur_player_idx, location=action)
+            if next_player_index == self.index:
+                successor_value = self.__max_player(successor, cur_depth - 1, num_of_players, winning_streak)
+            else:
+                successor_value = self.__expecty_player(successor, cur_depth, num_of_players, next_player_index,
+                                                     winning_streak)
+            successors_vals.append(successor_value)
+        return ExpectimaxAgent.calc_expected_val(successors_vals, winning_streak)
+
+
+    def __max_player(self, cur_state, cur_depth, num_of_players, winning_streak):
+        legal_actions = cur_state.get_legal_actions(winning_streak)
+        if cur_depth == 0 or not legal_actions:
+            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
+        max_value_found = self.MIN_SCORE
+        next_player_index = self.get_next_player(self.index, num_of_players)
+        for action in legal_actions:
+            successor = cur_state.generate_successor(self.index, location=action)
+            successor_value = self.__expecty_player(successor, cur_depth - 1, num_of_players, next_player_index, winning_streak)
+            if successor_value > max_value_found:
+                max_value_found = successor_value
+        return max_value_found
 
 
 class QLearningPlayer(Player):
@@ -215,6 +295,8 @@ class QLearningPlayer(Player):
         return tuple(board.board.flatten())
 
 
+
+
 class PlayerFactory:
     @staticmethod
     def get_player(player_type, index, board_shape, evaluation_function_name="", depth=2):
@@ -229,6 +311,8 @@ class PlayerFactory:
             return AlphaBetaAgent(index, evaluation_function, depth)
         elif player_type == "rl_agent":
             return QLearningPlayer(index, board_shape)
+        elif player_type == "expectymax":
+            return ExpectimaxAgent(index, evaluation_function, depth)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 

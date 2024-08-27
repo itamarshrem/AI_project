@@ -4,6 +4,7 @@ from winning_patterns import WinningPatterns
 from scipy.signal import convolve
 import numpy as np
 
+SAFETY_MARGIN = 5
 
 def simple_evaluation_function(board, player_index):
     convolved = 0
@@ -27,7 +28,8 @@ def complex_evaluation_function(board, player_index, winning_streak):
             streaks[streak] += 1
 
     if streaks[winning_streak] > 0:
-        return np.inf, streaks[winning_streak]
+        # return np.inf, streaks[winning_streak]
+        return 2**(winning_streak + SAFETY_MARGIN), streaks[winning_streak]
 
     max_streak = max(streaks.keys())
     return 2 ** max_streak, streaks[max_streak]

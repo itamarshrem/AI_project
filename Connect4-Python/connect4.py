@@ -14,15 +14,20 @@ def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
     default_players_num = 2
-    parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[5, 7, 1], help='size of the board')
-    parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num, choices=["human", "random", "minmax", "alpha_beta", "rl_agent"], help='human, random')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "complex", "all_complex", "none"], help='simple, complex, None')
-    parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
+    parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[6, 7, 1], help='size of the board')
+    parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num,
+                        choices=["human", "random", "minmax", "alpha_beta", "expectymax", "rl_agent"],
+                        help='human, random, minmax, alpha_beta, expectymax, rl_agent')
+    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str,
+                        choices=["simple", "complex", "all_complex", "none"], help='simple, complex, None')
+    parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num,
+                        help='Depth of the search tree')
     parser.add_argument('-ws', '--winning_streak', type=int, default=4, help='Number of consecutive pieces to win')
     parser.add_argument('-s', '--sleep', action='store_true', help='Sleep between actions')
     parser.add_argument('-ng', '--num_of_games', type=int, default=1, help='Number of consecutive games')
     parser.add_argument('-ui', '--display_screen', action='store_true', help='if set, ui is displayed')
-    parser.add_argument('-bc', '--board_configuration', type=str, default="None", choices=["None", "edge_case1"], help='start a game with a specific board')
+    parser.add_argument('-bc', '--board_configuration', type=str, default="None", choices=["None", "edge_case1"],
+                        help='start a game with a specific board')
 
     return parser.parse_args()
 
@@ -38,7 +43,9 @@ def create_players(args):
     players = []
     player_index = 0
     for player_type in args.players:
-        players.append(PlayerFactory.get_player(player_type, player_index, args.board_shape, args.eval_functions[player_index], args.depths[player_index]))
+        players.append(
+            PlayerFactory.get_player(player_type, player_index, args.board_shape, args.eval_functions[player_index],
+                                     args.depths[player_index]))
         player_index += 1
     return players
 
@@ -58,8 +65,8 @@ def run_all_games(num_of_games, game, display_screen, board_configuration, board
         start_time = time.time()
         game_result = game.run(display_screen, board_configuration, board_shape)
         results[game_result] += 1
-        print(f"game {i+1}: player {game_result} won!! ")
-        print(f"game {i+1}: time taken: {time.time() - start_time} seconds")
+        print(f"game {i + 1}: player {game_result} won!! ")
+        print(f"game {i + 1}: time taken: {time.time() - start_time} seconds")
     print_results(results, num_of_games)
 
 
