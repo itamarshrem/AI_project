@@ -1,7 +1,8 @@
 import abc
-from evaluation_functions import *
 import random
-from board import Board
+
+from evaluation_functions import *
+
 
 class Player:
     MIN_SCORE = -np.inf, -np.inf
@@ -16,7 +17,7 @@ class Player:
 
 class RandomPlayer(Player):
     def get_action(self, board, num_of_players, winning_streak, ui=None):
-        legal_actions = board.get_legal_actions()
+        legal_actions = board.get_legal_actions(winning_streak)
         return legal_actions[np.random.choice(len(legal_actions))]
 
 
@@ -47,70 +48,64 @@ class MultiAgentSearchAgent(Player):
         super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
         self.depth = depth
-        if self.index == 0:
-            self.MAX_PLAYER = 0
-            self.MIN_PLAYER = 1
-        else:
-            self.MAX_PLAYER = 1
-            self.MIN_PLAYER = 0
+        # if self.index == 0:
+        #     self.MAX_PLAYER = 0
+        #     self.MIN_PLAYER = 1
+        # else:
+        #     self.MAX_PLAYER = 1
+        #     self.MIN_PLAYER = 0
 
     @abc.abstractmethod
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         return
 
+    @staticmethod
+    def get_next_player(cur_player, num_of_players):
+        return (cur_player + 1) % num_of_players
+
 
 class MinmaxAgent(MultiAgentSearchAgent):
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
-        """
-        Returns the minimax action from the current gameState using self.depth
-        and self.evaluationFunction.
-
-        Here are some method calls that might be useful when implementing minimax.
-
-        game_state.get_legal_actions(agent_index):
-            Returns a list of legal actions for an agent
-            agent_index=0 means our agent, the opponent is agent_index=1
-
-        Action.STOP:
-            The stop direction, which is always legal
-
-        game_state.generate_successor(agent_index, action):
-            Returns the successor game state after an agent takes an action
-        """
-        legal_actions = board.get_legal_actions()
+        legal_actions = board.get_legal_actions(winning_streak)
         if self.depth == 0 or not legal_actions:
             return None
         max_value_found = self.MIN_SCORE
         action_for_max_value = None
+        next_player_index = (self.index + 1) % num_of_players
         for action in legal_actions:
-            successor = board.generate_successor(self.MAX_PLAYER, location=action)
-            successor_value = self.__min_player(successor, self.depth - 1, winning_streak)
-            if successor_value > max_value_found:
+            successor = board.generate_successor(self.index, location=action)
+            successor_value = self.__min_player2(successor, self.depth, num_of_players, next_player_index, winning_streak)
+            if successor_value > max_value_found or action_for_max_value is None:
                 max_value_found = successor_value
                 action_for_max_value = action
         return action_for_max_value
 
-    def __min_player(self, cur_state, cur_depth, winning_streak):
-        legal_actions = cur_state.get_legal_actions()
+    def __min_player2(self, cur_state, cur_depth, num_of_players, cur_player_idx, winning_streak):
+        legal_actions = cur_state.get_legal_actions(winning_streak)
         if cur_depth == 0 or not legal_actions:
-            return self.evaluation_function(cur_state, self.MAX_PLAYER, self.MIN_PLAYER, winning_streak)
+            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         min_value_found = self.MAX_SCORE
+        next_player_index = (cur_player_idx + 1) % num_of_players
         for action in legal_actions:
-            successor = cur_state.generate_successor(self.MIN_PLAYER, location=action)
-            successor_value = self.__max_player(successor, cur_depth, winning_streak)
+            successor = cur_state.generate_successor(cur_player_idx, location=action)
+            if next_player_index == self.index:
+                successor_value = self.__max_player2(successor, cur_depth - 1, num_of_players, winning_streak)
+            else:
+                successor_value = self.__min_player2(successor, cur_depth, num_of_players, next_player_index, winning_streak)
             if successor_value < min_value_found:
                 min_value_found = successor_value
         return min_value_found
 
-    def __max_player(self, cur_state, cur_depth, winning_streak):
-        legal_actions = cur_state.get_legal_actions()
+    def __max_player2(self, cur_state, cur_depth, num_of_players, winning_streak):
+        legal_actions = cur_state.get_legal_actions(winning_streak)
         if cur_depth == 0 or not legal_actions:
-            return self.evaluation_function(cur_state, self.MAX_PLAYER, self.MIN_PLAYER, winning_streak)
+            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         max_value_found = self.MIN_SCORE
+        next_player_index = (self.index + 1) % num_of_players
         for action in legal_actions:
-            successor = cur_state.generate_successor(self.MAX_PLAYER, location=action)
-            successor_value = self.__min_player(successor, cur_depth - 1, winning_streak)
+            successor = cur_state.generate_successor(self.index, location=action)
+            successor_value = self.__min_player2(successor, cur_depth - 1, num_of_players, next_player_index, winning_streak)
             if successor_value > max_value_found:
                 max_value_found = successor_value
         return max_value_found
@@ -125,35 +120,35 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        action, value = self.__alphabeta_helper(board, self.MAX_PLAYER, 0, self.MIN_SCORE, self.MAX_SCORE, winning_streak)
+        action, value = self.__alphabeta_helper2(board, self.index, self.depth, self.MIN_SCORE, self.MAX_SCORE, num_of_players, winning_streak)
         return action
 
-    def __alphabeta_helper(self, cur_state, cur_player, cur_depth, a, b, winning_streak):
-        legal_actions = cur_state.get_legal_actions()
-        if cur_depth == self.depth or not legal_actions:
-            return None, self.evaluation_function(cur_state, self.MAX_PLAYER, self.MIN_PLAYER, winning_streak)
-        if cur_player == self.MAX_PLAYER:
-            return self.__max_helper(cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak)
-        return self.__min_helper(cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak)
+    def __alphabeta_helper2(self, cur_state, next_player, cur_depth, a, b, num_of_players, winning_streak):
+        legal_actions = cur_state.get_legal_actions(winning_streak)
+        if cur_depth == 0 or not legal_actions:
+            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
+        if next_player == self.index:
+            return self.__max_helper2(cur_state, next_player, cur_depth - 1, a, b, num_of_players, legal_actions, winning_streak)
+        return self.__min_helper2(cur_state, next_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak)
 
-    def __max_helper(self, cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak):
+    def __max_helper2(self, cur_state, cur_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak):
         max_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action)
-            _, new_a = self.__alphabeta_helper(successor, 1 - cur_player, cur_depth + cur_player, a, b, winning_streak)
-            if new_a > a:
+            _, new_a = self.__alphabeta_helper2(successor, self.get_next_player(cur_player, num_of_players), cur_depth, a, b, num_of_players, winning_streak)
+            if new_a > a or max_action is None:
                 a = new_a
                 max_action = action
             if b <= a:
                 break
         return max_action, a
 
-    def __min_helper(self, cur_state, cur_player, cur_depth, a, b, legal_actions, winning_streak):
+    def __min_helper2(self, cur_state, cur_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak):
         min_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action)
-            _, new_b = self.__alphabeta_helper(successor, 1 - cur_player, cur_depth + cur_player, a, b, winning_streak)
-            if new_b < b:
+            _, new_b = self.__alphabeta_helper2(successor, self.get_next_player(cur_player, num_of_players), cur_depth, a, b, num_of_players, winning_streak)
+            if new_b < b or min_action is None:
                 b = new_b
                 min_action = b
             if b <= a:
@@ -171,11 +166,11 @@ class QLearningPlayer(Player):
         self.q_table = defaultdict(lambda: np.zeros((board_shape[1], board_shape[2])))  # Initialize Q-values to 0
 
     def create_next_board(self, board, action):
-        disc_location = board.apply_action(action, self.index)
+        disc_location = board.generate_successor(action, self.index)
         return disc_location, board
 
     def calculate_reward(self, board, disc_location, winning_streak):
-        if board.winning_move(self.index, disc_location, winning_streak):
+        if board.have_we_won(self.index):
             return 100
         else:
             return 0
@@ -183,7 +178,7 @@ class QLearningPlayer(Player):
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         state = self.get_state_representation(board)
-        legal_actions = board.get_legal_actions()
+        legal_actions = board.get_legal_actions(winning_streak)
 
         # Epsilon-greedy action selection
         if np.random.rand() < self.exploration_rate:
@@ -194,7 +189,7 @@ class QLearningPlayer(Player):
             q_values = self.q_table[state]
             q_values_for_legal_actions = q_values[legal_actions]
             action = legal_actions[np.argmax(q_values_for_legal_actions)]
-        disc_location, next_board = self.create_next_board(board.__copy__() , action)
+        disc_location, next_board = self.create_next_board(board , action)
         reward = self.calculate_reward(board, disc_location, winning_streak)
         self.learn(board, action, reward, next_board)
         return action

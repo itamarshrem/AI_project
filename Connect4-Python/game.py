@@ -32,24 +32,18 @@ class Game:
         else:
             self.ui.print_to_screen(f"Player {result} wins!")
 
-    def game_finished(self):
-        return len(self.board.get_legal_actions()) == 0
 
     def _game_loop(self):
         player_index = 0
-        while not self._should_quit:
+        while not self.board.is_board_full():
             player = self.players[player_index]
             if self.sleep_between_actions:
                 time.sleep(1)
             action = player.get_action(self.board, len(self.players), self.winning_streak, self.ui)
-            if action is None:
-                return
-            location = self.board.apply_action(action, player.index)
+            self.board.apply_action(action, player.index)
             self.ui.display_board(self.board)
-            if self.winning_move(player, location):
+            if self.board.have_we_won(self.winning_streak):
                 return player_index
             player_index = (player_index + 1) % len(self.players)
         return self.TIE
 
-    def winning_move(self, current_player, disc_location):
-        return self.board.winning_move(current_player.index, disc_location, self.winning_streak)

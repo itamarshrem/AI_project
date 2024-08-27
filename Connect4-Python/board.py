@@ -14,6 +14,7 @@ class Board:
         else:
             self._board = board
             self.rows, self.cols, self.depth = board.shape
+        self.last_disc_location = None
 
     def __copy__(self):
         return Board(self.rows, self.cols, self.depth, self._board.copy())
@@ -22,21 +23,21 @@ class Board:
     def board(self):
         return self._board
 
-    def get_legal_actions(self):
+    def get_legal_actions(self, winning_streak):
+        if self.have_we_won(winning_streak):
+            return []
         return np.argwhere(self.board[self.rows - 1, :, :] == self.EMPTY_CELL).tolist()
+
+    def is_board_full(self):
+        return np.all(self.board != self.EMPTY_CELL)
 
     def apply_action(self, location, player):
         col, depth = location
         assert self._board[self.rows - 1, col, depth] == self.EMPTY_CELL
         row = self.get_next_open_row(location)
-        self._board[row][col][depth] = player
-        return row, col, depth
+        self._board[row, col, depth] = player
+        self.last_disc_location = (row, col, depth)
 
-    #todo it seems that we doesn't use the following function:
-    # def drop_piece(self, location, player):
-    #     col, depth = location
-    #     row = self.get_next_open_row((col, depth))
-    #     self._board[row][col][depth] = player
 
     def is_valid_location(self, location):
         col, depth = location
@@ -57,9 +58,12 @@ class Board:
         empty_char = str(self.EMPTY_CELL)
         return str(np.flip(self._board.squeeze(), 0)).replace('.', '.,').replace(']', '],')
 
-    def winning_move(self, current_player_index, disc_location, winning_streak):
+    def have_we_won(self, winning_streak):
+        if self.last_disc_location is None:
+            return False
         # Convolve the board with each kernel and check if any result contains self.winning_streak
-        x, y, z = disc_location
+        x, y, z = self.last_disc_location
+        current_player_index = self.board[x, y, z]
         slicing = (
             slice(max(x - (winning_streak - 1), 0), min(x + winning_streak, self.rows)),
             slice(max(y - (winning_streak - 1), 0), min(y + winning_streak, self.cols)),
