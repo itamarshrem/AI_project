@@ -61,6 +61,10 @@ def run_all_games(num_of_games, game, display_screen, board_configuration, board
         print(f"game {i+1}: player {game_result} won!! ")
         print(f"game {i+1}: time taken: {time.time() - start_time} seconds")
     print_results(results, num_of_games)
+    for player in game.players:
+        step_time_average = player.get_step_average_time()
+        if step_time_average is not None:
+            print(f"player {player.index} average step time: {step_time_average}")
 
 
 if __name__ == '__main__':
