@@ -1,5 +1,9 @@
 import abc
 import random
+import time
+from abc import abstractmethod
+from time import time_ns
+from turtledemo.penrose import start
 
 from evaluation_functions import *
 
@@ -13,6 +17,9 @@ class Player:
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         raise NotImplementedError()
+
+    def get_step_average_time(self):
+        return
 
 
 class RandomPlayer(Player):
@@ -48,6 +55,7 @@ class MultiAgentSearchAgent(Player):
         super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
         self.depth = depth
+        self.step_times = []
         # if self.index == 0:
         #     self.MAX_PLAYER = 0
         #     self.MIN_PLAYER = 1
@@ -55,9 +63,20 @@ class MultiAgentSearchAgent(Player):
         #     self.MAX_PLAYER = 1
         #     self.MIN_PLAYER = 0
 
-    @abc.abstractmethod
     def get_action(self, board, num_of_players, winning_streak, ui=None):
+        start_time = time.time()
+        action = self._get_action(board, num_of_players, winning_streak, ui)
+        time_taken = time.time() - start_time
+        self.step_times.append(time_taken)
+        # print(f"Time taken for move: {time_taken}")
+        return action
+
+    @abstractmethod
+    def _get_action(self, board, num_of_players, winning_streak, ui=None):
         return
+
+    def get_step_average_time(self):
+        return np.mean(self.step_times)
 
     @staticmethod
     def get_next_player(cur_player, num_of_players):
@@ -66,7 +85,7 @@ class MultiAgentSearchAgent(Player):
 
 class MinmaxAgent(MultiAgentSearchAgent):
 
-    def get_action(self, board, num_of_players, winning_streak, ui=None):
+    def _get_action(self, board, num_of_players, winning_streak, ui=None):
         legal_actions = board.get_legal_actions(winning_streak)
         if self.depth == 0 or not legal_actions:
             return None
@@ -105,7 +124,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
         next_player_index = (self.index + 1) % num_of_players
         for action in legal_actions:
             successor = cur_state.generate_successor(self.index, location=action)
-            successor_value = self.__min_player2(successor, cur_depth - 1, num_of_players, next_player_index, winning_streak)
+            successor_value = self.__min_player2(successor, cur_depth, num_of_players, next_player_index, winning_streak)
             if successor_value > max_value_found:
                 max_value_found = successor_value
         return max_value_found
@@ -116,7 +135,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
     """
 
-    def get_action(self, board, num_of_players, winning_streak, ui=None):
+    def _get_action(self, board, num_of_players, winning_streak, ui=None):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
@@ -159,6 +178,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 class QLearningPlayer(Player):
     def __init__(self, index, board_shape, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.995):
         super().__init__(index)
+        self.currently_learning = True
+        self.step_times = []
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
@@ -175,8 +196,8 @@ class QLearningPlayer(Player):
         else:
             return 0
 
-
     def get_action(self, board, num_of_players, winning_streak, ui=None):
+        start_time = time.time()
         state = self.get_state_representation(board)
         legal_actions = board.get_legal_actions(winning_streak)
 
@@ -192,6 +213,10 @@ class QLearningPlayer(Player):
         disc_location, next_board = self.create_next_board(board , action)
         reward = self.calculate_reward(board, disc_location, winning_streak)
         self.learn(board, action, reward, next_board)
+        if not self.currently_learning:
+            time_taken = time.time() - start_time
+            self.step_times.append(time_taken)
+            # print(f"Time taken for move: {time_taken}")
         return action
 
     def learn(self, board, action, reward, next_board):
@@ -213,6 +238,12 @@ class QLearningPlayer(Player):
         This method returns a tuple that uniquely represents the state of the 3d board.
         """
         return tuple(board.board.flatten())
+
+    def stop_learning(self):
+        self.currently_learning = False
+
+    def get_step_average_time(self):
+        return np.mean(self.step_times)
 
 
 class PlayerFactory:
