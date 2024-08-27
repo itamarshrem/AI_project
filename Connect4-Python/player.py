@@ -175,7 +175,6 @@ class QLearningPlayer(Player):
         else:
             return 0
 
-
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         state = self.get_state_representation(board)
         legal_actions = board.get_legal_actions(winning_streak)
