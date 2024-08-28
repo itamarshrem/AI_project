@@ -5,6 +5,8 @@ from abc import abstractmethod
 from time import time_ns
 from turtledemo.penrose import start
 
+import numpy as np
+
 from evaluation_functions import *
 
 
@@ -186,15 +188,13 @@ class QLearningPlayer(Player):
         self.exploration_decay = exploration_decay
         self.q_table = defaultdict(lambda: np.zeros((board_shape[1], board_shape[2])))  # Initialize Q-values to 0
 
-    def create_next_board(self, board, action):
-        disc_location = board.generate_successor(action, self.index)
-        return disc_location, board
-
-    def calculate_reward(self, board, disc_location, winning_streak):
+    def calculate_reward(self, board):
         if board.have_we_won(self.index):
             return 100
         else:
             return 0
+
+    def monte_carlo_simulation(self, board):
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
@@ -208,10 +208,11 @@ class QLearningPlayer(Player):
         else:
             # Exploit: select the action with the highest Q-value
             q_values = self.q_table[state]
-            q_values_for_legal_actions = q_values[legal_actions]
+            legal_actions_indices = [i for i, j in legal_actions], [j for i, j in legal_actions]
+            q_values_for_legal_actions = q_values[legal_actions_indices]
             action = legal_actions[np.argmax(q_values_for_legal_actions)]
-        disc_location, next_board = self.create_next_board(board , action)
-        reward = self.calculate_reward(board, disc_location, winning_streak)
+        next_board = board.generate_successor(self.index, action)
+        reward = self.calculate_reward(board)
         self.learn(board, action, reward, next_board)
         if not self.currently_learning:
             time_taken = time.time() - start_time
