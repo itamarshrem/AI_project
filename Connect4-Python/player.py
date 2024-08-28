@@ -3,8 +3,6 @@ import random
 import time
 from abc import abstractmethod
 
-import numpy as np
-
 from evaluation_functions import *
 from game import Game
 
