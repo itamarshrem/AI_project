@@ -26,7 +26,7 @@ def complex_evaluation_function(board, player_index, winning_streak):
         for streak in not_blocked_streaks:
             streaks[streak] += 1
 
-    if streaks[winning_streak] > 0:
+    if winning_streak in streaks and streaks[winning_streak] > 0:
         return np.inf, streaks[winning_streak]
 
     max_streak = max(streaks.keys())
@@ -46,6 +46,3 @@ def all_complex_evaluation_function(board, player_index, num_of_players, winning
             max_opponents_streaks_appearance += max_opponents_streaks_appearance
 
     return score[0] - max_opponents_streaks, score[1] - max_opponents_streaks_appearance
-    # if score[0] > opponent_score[0]:
-    #     return score[0] - opponent_score[0], score[1]
-    # return score[0] - opponent_scores[0], score[1] - opponent_scores[1]
