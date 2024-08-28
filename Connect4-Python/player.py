@@ -2,10 +2,9 @@ import abc
 import random
 import time
 from abc import abstractmethod
-from time import time_ns
-from turtledemo.penrose import start
 
 from evaluation_functions import *
+from game import Game
 
 
 class Player:
@@ -20,6 +19,10 @@ class Player:
 
     def get_step_average_time(self):
         return
+
+    @staticmethod
+    def get_next_player(cur_player, num_of_players):
+        return (cur_player + 1) % num_of_players
 
 
 class RandomPlayer(Player):
@@ -78,9 +81,6 @@ class MultiAgentSearchAgent(Player):
     def get_step_average_time(self):
         return np.mean(self.step_times)
 
-    @staticmethod
-    def get_next_player(cur_player, num_of_players):
-        return (cur_player + 1) % num_of_players
 
 
 class MinmaxAgent(MultiAgentSearchAgent):
@@ -176,48 +176,80 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
 
 class QLearningPlayer(Player):
-    def __init__(self, index, board_shape, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.995):
+    class ActionCreator:
+        def __init__(self, board_shape):
+            self.board_shape = board_shape
+
+        def __call__(self):
+            return np.zeros((self.board_shape[1], self.board_shape[2]))
+
+    def __init__(self, index, board_shape, currently_learning=False, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.995):
         super().__init__(index)
-        self.currently_learning = True
+        self.currently_learning = currently_learning
         self.step_times = []
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
         self.exploration_decay = exploration_decay
-        self.q_table = defaultdict(lambda: np.zeros((board_shape[1], board_shape[2])))  # Initialize Q-values to 0
-
+        action_creator = QLearningPlayer.ActionCreator(board_shape)
+        self.q_table = defaultdict(action_creator)
     def create_next_board(self, board, action):
         disc_location = board.generate_successor(action, self.index)
         return disc_location, board
-
-    def calculate_reward(self, board, disc_location, winning_streak):
-        if board.have_we_won(self.index):
-            return 100
-        else:
-            return 0
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
         state = self.get_state_representation(board)
         legal_actions = board.get_legal_actions(winning_streak)
+        if self.currently_learning:
+            if np.random.rand() < self.exploration_rate:
+                action = random.choice(legal_actions)
+            else:
+                q_values = self.q_table[state]
+                legal_actions_indices = [action[0] for action in legal_actions], [action[1] for action in legal_actions]
+                q_values_for_legal_actions = q_values[legal_actions_indices]
+                action = legal_actions[np.argmax(q_values_for_legal_actions)]
 
-        # Epsilon-greedy action selection
-        if np.random.rand() < self.exploration_rate:
-            # Explore: select a random legal action
-            action = random.choice(legal_actions)
+            next_board = board.generate_successor(self.index, action)
+            reward = self.calculate_reward(next_board, num_of_players, winning_streak)
+            self.learn(board, action, reward, next_board)
         else:
-            # Exploit: select the action with the highest Q-value
-            q_values = self.q_table[state]
-            q_values_for_legal_actions = q_values[legal_actions]
-            action = legal_actions[np.argmax(q_values_for_legal_actions)]
-        disc_location, next_board = self.create_next_board(board , action)
-        reward = self.calculate_reward(board, disc_location, winning_streak)
-        self.learn(board, action, reward, next_board)
-        if not self.currently_learning:
-            time_taken = time.time() - start_time
-            self.step_times.append(time_taken)
-            # print(f"Time taken for move: {time_taken}")
+            action = legal_actions[np.argmax(self.q_table[state][legal_actions])]
+        time_taken = time.time() - start_time
+        self.step_times.append(time_taken)
         return action
+
+    def monte_carlo_simulation(self, board, num_of_players, winning_streak, steps=None):
+        next_board = board.__copy__()
+        cur_player = self.get_next_player(self.index, num_of_players)
+        i = 0
+        while steps is None or i < steps:
+            if next_board.have_we_won(winning_streak):
+                return cur_player
+            elif next_board.is_board_full():
+                return Game.TIE
+            legal_actions = next_board.get_legal_actions(winning_streak)
+            action = random.choice(legal_actions)
+            next_board = next_board.generate_successor(cur_player, location=action)
+            cur_player = self.get_next_player(cur_player, num_of_players)
+            i += 1
+
+        return Game.TIE
+
+    def calculate_reward(self, board, num_of_players, winning_streak, num_of_simulations=10):
+        reward = 0
+        for i in range(num_of_simulations):
+            result = self.monte_carlo_simulation(board, num_of_players, winning_streak)
+            if result == self.index:
+                reward += 1000
+            elif result == Game.TIE:
+                pass
+            else:
+                reward -= 1000
+
+        return reward / num_of_simulations
+
+
 
     def learn(self, board, action, reward, next_board):
         state = self.get_state_representation(board)
