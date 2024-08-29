@@ -4,7 +4,6 @@ import time
 import random
 
 import numpy as np
-import pygame
 from game import Game
 from player import PlayerFactory
 from winning_patterns import WinningPatterns
@@ -72,7 +71,7 @@ if __name__ == '__main__':
     np.random.seed(0)
     args = parse_args()
     validate_input(args)
-    WinningPatterns.build_patterns(args.winning_streak)
+    WinningPatterns.build_shapes(args.winning_streak, args.board_shape)
     players = create_players(args)
     game = Game(args.winning_streak, players, sleep_between_actions=args.sleep)
     run_all_games(args.num_of_games, game, args.display_screen, args.board_configuration, args.board_shape)

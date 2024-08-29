@@ -19,7 +19,7 @@ class Game:
 
     def run(self, display_ui, board_configuration, board_shape):
         self._should_quit = False
-        self.board = BoardFactory.get_board(board_configuration, board_shape)
+        self.board = BoardFactory.get_board(board_configuration, board_shape, len(self.players))
         self.ui = UIFactory.getUI(display_ui, self.board)
         self.ui.display_board(self.board)
         result = self._game_loop()
@@ -40,7 +40,7 @@ class Game:
             if self.sleep_between_actions:
                 time.sleep(1)
             action = player.get_action(self.board, len(self.players), self.winning_streak, self.ui)
-            self.board.apply_action(action, player.index)
+            self.board.apply_action(action, player.index, self.winning_streak)
             self.ui.display_board(self.board)
             if self.board.have_we_won(self.winning_streak):
                 return player_index
