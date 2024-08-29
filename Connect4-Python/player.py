@@ -181,6 +181,36 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return min_action, b
 
 
+class SimplePlayer(MultiAgentSearchAgent):
+    def __init__(self, index, evaluation_function=None):
+        super(MultiAgentSearchAgent, self).__init__(index)
+        self.evaluation_function = evaluation_function
+        self.step_times = []
+
+    def _get_action(self, board, num_of_players, winning_streak, ui=None):
+        """
+        Returns the minimax action using self.depth and self.evaluationFunction
+        """
+        legal_actions = board.get_legal_actions(winning_streak)
+        if not legal_actions:
+            return None, self.evaluation_function(board, self.index, num_of_players, winning_streak)
+
+        actions_values = []
+        for action in legal_actions:
+            successor = board.generate_successor(self.index, location=action, winning_streak=winning_streak)
+            value = self.evaluation_function(successor, self.index, num_of_players, winning_streak)
+            actions_values.append(value)
+
+        actions_values = np.array(actions_values)
+        # apply softmax on the values and choose a random action based on the probabilities
+        # probabilities = np.exp(actions_values) / np.sum(np.exp(actions_values))
+        # action = legal_actions[np.random.choice(len(legal_actions), p=probabilities)]
+
+        # choose the action with the highest value
+        action = legal_actions[np.argmax(actions_values)]
+        return action
+
+
 class QLearningPlayer(Player):
     class ActionCreator:
         def __init__(self, board_shape):
@@ -311,6 +341,8 @@ class PlayerFactory:
                     return q_learning_player
             else:
                 return QLearningPlayer(index, args.board_shape, currently_learning=False)
+        elif player_type == "simple":
+            return SimplePlayer(index, evaluation_function)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
@@ -318,9 +350,11 @@ class PlayerFactory:
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
             return simple_evaluation_function
-        elif evaluation_function == "complex":
-            return complex_evaluation_function
         elif evaluation_function == "all_complex":
             return all_complex_evaluation_function
+        elif evaluation_function == "defensive":
+            return defensive_evaluation_function
+        elif evaluation_function == "offensive":
+            return offensive_evaluation_function
         else:
             return None
