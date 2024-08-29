@@ -15,12 +15,9 @@ def parse_args():
     parser = argparse.ArgumentParser()
     default_players_num = 2
     parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[6, 7, 1], help='size of the board')
-    parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num,
-                        choices=["human", "random", "minmax", "alpha_beta", "rl_agent"], help='human, random')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str,
-                        choices=["simple", "complex", "all_complex", "none"], help='simple, complex, None')
-    parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num,
-                        help='Depth of the search tree')
+    parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline"], help='human, random, minmax, alpha_beta, rl_agent, baseline')
+    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "all_complex", "simple",  "defensive", "offensive", "ibef", "none"], help='simple, all_complex, simple, defensive, offensive, ibef, none')
+    parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
     parser.add_argument('-ws', '--winning_streak', type=int, default=4, help='Number of consecutive pieces to win')
     parser.add_argument('-s', '--sleep', action='store_true', help='Sleep between actions')
     parser.add_argument('-lrl', '--load_rl_agent', action='store_true', help='load rl agent from memory')

@@ -61,11 +61,16 @@ class MultiAgentSearchAgent(Player):
     is another abstract class.
     """
 
-    def __init__(self, index, evaluation_function=None, depth=2):
+    def __init__(self, index, evaluation_function=None, depth=2, eval_func_return_depth=2):
         super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
         self.depth = depth
         self.step_times = []
+        if eval_func_return_depth != 2:
+            self.MAX_SCORE = tuple([np.inf] * eval_func_return_depth)
+            self.MIN_SCORE = tuple([-np.inf] * eval_func_return_depth)
+
+
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
@@ -174,6 +179,36 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if b <= a:
                 break
         return min_action, b
+
+
+class BaselinePlayer(MultiAgentSearchAgent):
+    def __init__(self, index, evaluation_function=None):
+        super(MultiAgentSearchAgent, self).__init__(index)
+        self.evaluation_function = evaluation_function
+        self.step_times = []
+
+    def _get_action(self, board, num_of_players, winning_streak, ui=None):
+        """
+        Returns the minimax action using self.depth and self.evaluationFunction
+        """
+        legal_actions = board.get_legal_actions(winning_streak)
+        if not legal_actions:
+            return None, self.evaluation_function(board, self.index, num_of_players, winning_streak)
+
+        actions_values = []
+        for action in legal_actions:
+            successor = board.generate_successor(self.index, location=action, winning_streak=winning_streak)
+            value = self.evaluation_function(successor, self.index, num_of_players, winning_streak)
+            actions_values.append(value)
+
+        actions_values = np.array(actions_values)
+        # apply softmax on the values and choose a random action based on the probabilities
+        # probabilities = np.exp(actions_values) / np.sum(np.exp(actions_values))
+        # action = legal_actions[np.random.choice(len(legal_actions), p=probabilities)]
+
+        # choose the action with the highest value
+        action = legal_actions[np.argmax(actions_values)]
+        return action
 
 
 class QLearningPlayer(Player):
@@ -290,16 +325,19 @@ class PlayerFactory:
     @staticmethod
     def get_player(player_type, index, args):
         evaluation_function = PlayerFactory.get_evaluation_function(args.eval_functions[index])
+        eval_func_return_depth = 1 if args.eval_functions[index] in {'simple_function', 'ibef'} else 2
         if player_type == "random":
             return RandomPlayer(index)
         elif player_type == "human":
             return HumanPlayer(index)
         elif player_type == "minmax":
-            return MinmaxAgent(index, evaluation_function, args.depths[index])
+            return MinmaxAgent(index, evaluation_function, args.depths[index], eval_func_return_depth)
         elif player_type == "alpha_beta":
-            return AlphaBetaAgent(index, evaluation_function, args.depths[index])
+            return AlphaBetaAgent(index, evaluation_function, args.depths[index], eval_func_return_depth)
         elif player_type == "rl_agent":
             return PlayerFactory.create_rl_agent(args.winning_streak, args.board_shape, 0, 2, args.load_rl_agent)
+        elif player_type == "baseline":
+            return BaselinePlayer(index, evaluation_function)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
@@ -322,9 +360,13 @@ class PlayerFactory:
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
             return simple_evaluation_function
-        elif evaluation_function == "complex":
-            return complex_evaluation_function
         elif evaluation_function == "all_complex":
             return all_complex_evaluation_function
+        elif evaluation_function == "defensive":
+            return defensive_evaluation_function
+        elif evaluation_function == "offensive":
+            return offensive_evaluation_function
+        elif evaluation_function == "ibef":
+            return ibef_evaluation_function
         else:
             return None
