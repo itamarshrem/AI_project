@@ -5,6 +5,12 @@ from abc import abstractmethod
 
 from evaluation_functions import *
 from game import Game
+import pickle
+import os
+
+def compute_path_to_rl_agent_file(relative_file_name):
+    current_directory = os.getcwd()
+    return current_directory + "/" + relative_file_name
 
 
 class Player:
@@ -280,18 +286,26 @@ class QLearningPlayer(Player):
 
 class PlayerFactory:
     @staticmethod
-    def get_player(player_type, index, board_shape, evaluation_function_name="", depth=2):
-        evaluation_function = PlayerFactory.get_evaluation_function(evaluation_function_name)
+    def get_player(player_type, index, args):
+        evaluation_function = PlayerFactory.get_evaluation_function(args.eval_functions[index])
         if player_type == "random":
             return RandomPlayer(index)
         elif player_type == "human":
             return HumanPlayer(index)
         elif player_type == "minmax":
-            return MinmaxAgent(index, evaluation_function, depth)
+            return MinmaxAgent(index, evaluation_function, args.depths[index])
         elif player_type == "alpha_beta":
-            return AlphaBetaAgent(index, evaluation_function, depth)
+            return AlphaBetaAgent(index, evaluation_function, args.depths[index])
         elif player_type == "rl_agent":
-            return QLearningPlayer(index, board_shape)
+            ql_index = 0
+            depth = 2
+            file_name = f"qlearning_player_ws_{args.winning_streak}_players_2_shape_{args.board_shape}_index_{ql_index}_depth_{depth}.pkl"
+            full_path = compute_path_to_rl_agent_file(file_name)
+            if args.load_rl_agent:
+                with open(full_path, 'rb') as file_object:
+                    return pickle.load(file_object)
+            else:
+                return QLearningPlayer(index, args.board_shape, currently_learning=False)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
