@@ -7,7 +7,6 @@ import numpy as np
 from game import Game
 from player import PlayerFactory
 from winning_patterns import WinningPatterns
-from player import compute_path_to_rl_agent_qtable
 import pickle
 
 
