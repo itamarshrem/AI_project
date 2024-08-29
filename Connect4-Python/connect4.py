@@ -4,7 +4,6 @@ import time
 import random
 
 import numpy as np
-import pygame
 from game import Game
 from player import PlayerFactory
 from winning_patterns import WinningPatterns
@@ -97,6 +96,6 @@ if __name__ == '__main__':
     np.random.seed(0)
     args = parse_args()
     validate_input(args)
-    WinningPatterns.build_patterns(args.winning_streak)
-    # main(args)
-    train_qlearning_player(args.num_of_games, args.board_shape, args.winning_streak, load_qlearning_player=False)
+    WinningPatterns.build_shapes(args.winning_streak, args.board_shape)
+    main(args)
+    # train_qlearning_player(args.num_of_games, args.board_shape, args.winning_streak, load_qlearning_player=False)
