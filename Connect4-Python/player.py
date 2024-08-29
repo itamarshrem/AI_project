@@ -189,7 +189,7 @@ class QLearningPlayer(Player):
         def __call__(self):
             return np.zeros((self.board_shape[1], self.board_shape[2]))
 
-    def __init__(self, index, board_shape, currently_learning=False, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.995):
+    def __init__(self, index, board_shape, currently_learning=False, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=1):
         super().__init__(index)
         self.currently_learning = currently_learning
         self.step_times = []
@@ -199,6 +199,11 @@ class QLearningPlayer(Player):
         self.exploration_decay = exploration_decay
         action_creator = QLearningPlayer.ActionCreator(board_shape)
         self.q_table = defaultdict(action_creator)
+
+    def set_is_learning(self, is_currently_learning):
+        self.currently_learning = is_currently_learning
+    def set_exploration_decay(self, exploration_decay):
+        self.exploration_decay = exploration_decay
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
@@ -300,7 +305,10 @@ class PlayerFactory:
             full_path = compute_path_to_rl_agent_file(file_name)
             if args.load_rl_agent:
                 with open(full_path, 'rb') as file_object:
-                    return pickle.load(file_object)
+                    q_learning_player = pickle.load(file_object)
+                    q_learning_player.set_is_learning(False)
+                    q_learning_player.set_exploration_decay(0.995)
+                    return q_learning_player
             else:
                 return QLearningPlayer(index, args.board_shape, currently_learning=False)
         else:

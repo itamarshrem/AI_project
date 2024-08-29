@@ -39,7 +39,10 @@ class Board:
     def get_legal_actions(self, winning_streak):
         if self.have_we_won(winning_streak):
             return []
-        return np.argwhere(self.board[self.rows - 1, :, :] == self.EMPTY_CELL).tolist()
+        legal_actions = np.argwhere(self.board[self.rows - 1, :, :] == self.EMPTY_CELL)
+        np.random.shuffle(legal_actions)
+        return legal_actions.tolist()
+        # return np.argwhere(self.board[self.rows - 1, :, :] == self.EMPTY_CELL).tolist()
 
     def is_board_full(self):
         return np.all(self.board != self.EMPTY_CELL)
