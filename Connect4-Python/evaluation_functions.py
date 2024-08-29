@@ -5,16 +5,6 @@ from winning_patterns import WinningPatterns
 from scipy.signal import convolve
 import numpy as np
 
-
-def simple_evaluation_function(board, player_index):
-    convolved = 0
-    for kernel in WinningPatterns.PATTERNS:
-        if board.depth == 1 and kernel.shape[2] > 1:
-            continue
-        convolved = max(convolved, np.max(convolve((board == player_index).astype(int), kernel, mode='valid')))
-    return convolved
-
-
 # def _complex_evaluation_function(board, player_index, winning_streak):
 #     streaks = defaultdict(lambda: 0)
 #     streaks[0] = 0
@@ -106,6 +96,18 @@ def all_complex_evaluation_function(board, player_index, num_of_players, winning
     # assert final_score == _all_complex_evaluation_function(board, player_index, num_of_players, winning_streak)
     return final_score
 
+
+def simple_evaluation_function(board, player_index, num_of_players, winning_streak):
+    cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
+        complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
+
+    return cur_player_max_streak - max_opponents_streaks
+
+def ibef_evaluation_function(board, player_index, num_of_players, winning_streak):
+    cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
+        complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
+
+    return (cur_player_max_streak * cur_player_max_streak_app) - (max_opponents_streaks * max_opponents_streaks_app)
 
 def defensive_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \

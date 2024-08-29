@@ -60,11 +60,15 @@ class MultiAgentSearchAgent(Player):
     is another abstract class.
     """
 
-    def __init__(self, index, evaluation_function=None, depth=2):
+    def __init__(self, index, evaluation_function=None, depth=2, eval_func_return_depth=2):
         super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
         self.depth = depth
         self.step_times = []
+        if eval_func_return_depth != 2:
+            self.MAX_SCORE = tuple([np.inf] * eval_func_return_depth)
+            self.MIN_SCORE = tuple([-np.inf] * eval_func_return_depth)
+
         # if self.index == 0:
         #     self.MAX_PLAYER = 0
         #     self.MIN_PLAYER = 1
@@ -181,7 +185,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return min_action, b
 
 
-class SimplePlayer(MultiAgentSearchAgent):
+class BaselinePlayer(MultiAgentSearchAgent):
     def __init__(self, index, evaluation_function=None):
         super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
@@ -320,14 +324,15 @@ class PlayerFactory:
     @staticmethod
     def get_player(player_type, index, args):
         evaluation_function = PlayerFactory.get_evaluation_function(args.eval_functions[index])
+        eval_func_return_depth = 1 if args.eval_functions[index] in {'simple_function', 'ibef'} else 2
         if player_type == "random":
             return RandomPlayer(index)
         elif player_type == "human":
             return HumanPlayer(index)
         elif player_type == "minmax":
-            return MinmaxAgent(index, evaluation_function, args.depths[index])
+            return MinmaxAgent(index, evaluation_function, args.depths[index], eval_func_return_depth)
         elif player_type == "alpha_beta":
-            return AlphaBetaAgent(index, evaluation_function, args.depths[index])
+            return AlphaBetaAgent(index, evaluation_function, args.depths[index], eval_func_return_depth)
         elif player_type == "rl_agent":
             ql_index = 0
             depth = 2
@@ -341,8 +346,8 @@ class PlayerFactory:
                     return q_learning_player
             else:
                 return QLearningPlayer(index, args.board_shape, currently_learning=False)
-        elif player_type == "simple":
-            return SimplePlayer(index, evaluation_function)
+        elif player_type == "baseline":
+            return BaselinePlayer(index, evaluation_function)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
@@ -356,5 +361,7 @@ class PlayerFactory:
             return defensive_evaluation_function
         elif evaluation_function == "offensive":
             return offensive_evaluation_function
+        elif evaluation_function == "ibef":
+            return ibef_evaluation_function
         else:
             return None
