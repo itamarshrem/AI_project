@@ -61,10 +61,11 @@ class MultiAgentSearchAgent(Player):
     is another abstract class.
     """
 
-    def __init__(self, index, evaluation_function=None, depth=2, eval_func_return_depth=2):
+    def __init__(self, index, evaluation_function=None, depth=2, eval_func_return_depth=2, gamma=0):
         super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
         self.depth = depth
+        self.gamma = gamma
         self.step_times = []
         if eval_func_return_depth != 2:
             self.MAX_SCORE = tuple([np.inf] * eval_func_return_depth)
@@ -74,7 +75,12 @@ class MultiAgentSearchAgent(Player):
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
-        action = self._get_action(board, num_of_players, winning_streak, ui)
+        # call _get_action if random is smaller than gamma
+        if np.random.rand() >= self.gamma:
+            action = self._get_action(board, num_of_players, winning_streak, ui)
+        else:
+            legal_actions = board.get_legal_actions(winning_streak)
+            action = legal_actions[np.random.choice(len(legal_actions))]
         time_taken = time.time() - start_time
         self.step_times.append(time_taken)
         # print(f"Time taken for move: {time_taken}")
@@ -331,9 +337,9 @@ class PlayerFactory:
         elif player_type == "human":
             return HumanPlayer(index)
         elif player_type == "minmax":
-            return MinmaxAgent(index, evaluation_function, args.depths[index], eval_func_return_depth)
+            return MinmaxAgent(index, evaluation_function, args.depths[index], eval_func_return_depth, args.gamma[index])
         elif player_type == "alpha_beta":
-            return AlphaBetaAgent(index, evaluation_function, args.depths[index], eval_func_return_depth)
+            return AlphaBetaAgent(index, evaluation_function, args.depths[index], eval_func_return_depth, args.gamma[index])
         elif player_type == "rl_agent":
             return PlayerFactory.create_rl_agent(args.winning_streak, args.board_shape, 0, 2, args.load_rl_agent)
         elif player_type == "baseline":
