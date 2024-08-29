@@ -209,12 +209,12 @@ class QLearningPlayer(Player):
         start_time = time.time()
         state = self.get_state_representation(board)
         legal_actions = board.get_legal_actions(winning_streak)
+        legal_actions_indices = [action[0] for action in legal_actions], [action[1] for action in legal_actions]
         if self.currently_learning:
             if np.random.rand() < self.exploration_rate:
                 action = random.choice(legal_actions)
             else:
                 q_values = self.q_table[state]
-                legal_actions_indices = [action[0] for action in legal_actions], [action[1] for action in legal_actions]
                 q_values_for_legal_actions = q_values[legal_actions_indices]
                 action = legal_actions[np.argmax(q_values_for_legal_actions)]
 
@@ -222,7 +222,9 @@ class QLearningPlayer(Player):
             reward = self.calculate_reward(next_board, num_of_players, winning_streak)
             self.learn(board, action, reward, next_board)
         else:
-            action = legal_actions[np.argmax(self.q_table[state][legal_actions])]
+            q_values = self.q_table[state]
+            q_values_for_legal_actions = q_values[legal_actions_indices]
+            action = legal_actions[np.argmax(q_values_for_legal_actions)]
         time_taken = time.time() - start_time
         self.step_times.append(time_taken)
         return action

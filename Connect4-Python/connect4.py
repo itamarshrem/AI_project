@@ -87,6 +87,26 @@ def train_qlearning_player(num_of_games, board_shape, winning_streak, load_qlear
     with open(file_name, 'wb') as file_object:
         pickle.dump(qlearning_player, file_object)
 
+
+def _train_qlearning_player(num_of_games, board_shape, winning_streak, load_qlearning_player=False):
+    ql_index = 0
+    depth = 2
+    file_name = f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
+    full_path = compute_path_to_rl_agent_file(file_name)
+    if load_qlearning_player:
+        with open(full_path, 'rb') as file_object:
+            q_table = pickle.load(file_object)
+    else:
+        q_table = None
+    qlearning_player = QLearningPlayer(ql_index, board_shape, True, q_table=q_table)
+    minmax_player = PlayerFactory.get_player("minmax", 1 - ql_index, args)
+    players = [qlearning_player, minmax_player]
+    game = Game(winning_streak, players, sleep_between_actions=False)
+    run_all_games(num_of_games, game, False, "None", board_shape)
+    # save the qlearning player
+    with open(file_name, 'wb') as file_object:
+        pickle.dump(qlearning_player.q_table, file_object)
+
 def main(args):
     players = create_players(args)
     game = Game(args.winning_streak, players, sleep_between_actions=args.sleep)
