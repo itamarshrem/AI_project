@@ -40,9 +40,9 @@ def all_complex_evaluation_function(board, player_index, num_of_players, winning
     max_opponents_streaks_appearance = 0
     alpha = 1 / (num_of_players - 1)
     for other_player in other_players:
-        max_opponent_streaks, max_opponents_streaks_appearance = complex_evaluation_function(board, other_player, winning_streak)
+        max_opponent_streaks, max_opponent_streaks_appearance = complex_evaluation_function(board, other_player, winning_streak)
         max_opponents_streaks += alpha * max_opponent_streaks
         if max_opponent_streaks == score[0]:
-            max_opponents_streaks_appearance += max_opponents_streaks_appearance
+            max_opponents_streaks_appearance += max_opponent_streaks_appearance
 
     return score[0] - max_opponents_streaks, score[1] - max_opponents_streaks_appearance
