@@ -8,9 +8,10 @@ from game import Game
 import pickle
 import os
 
-def compute_path_to_rl_agent_file(relative_file_name):
+def compute_path_to_rl_agent_qtable(relative_file_name):
     current_directory = os.getcwd()
     return current_directory + "/" + relative_file_name
+
 
 
 class Player:
@@ -65,12 +66,6 @@ class MultiAgentSearchAgent(Player):
         self.evaluation_function = evaluation_function
         self.depth = depth
         self.step_times = []
-        # if self.index == 0:
-        #     self.MAX_PLAYER = 0
-        #     self.MIN_PLAYER = 1
-        # else:
-        #     self.MAX_PLAYER = 1
-        #     self.MIN_PLAYER = 0
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
@@ -189,7 +184,7 @@ class QLearningPlayer(Player):
         def __call__(self):
             return np.zeros((self.board_shape[1], self.board_shape[2]))
 
-    def __init__(self, index, board_shape, currently_learning=False, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=1):
+    def __init__(self, index, board_shape, currently_learning=False, q_table=None, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=1):
         super().__init__(index)
         self.currently_learning = currently_learning
         self.step_times = []
@@ -197,8 +192,11 @@ class QLearningPlayer(Player):
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
         self.exploration_decay = exploration_decay
-        action_creator = QLearningPlayer.ActionCreator(board_shape)
-        self.q_table = defaultdict(action_creator)
+        if q_table is None:
+            action_creator = QLearningPlayer.ActionCreator(board_shape)
+            self.q_table = defaultdict(action_creator)
+        else:
+            self.q_table = q_table
 
     def set_is_learning(self, is_currently_learning):
         self.currently_learning = is_currently_learning
@@ -301,21 +299,24 @@ class PlayerFactory:
         elif player_type == "alpha_beta":
             return AlphaBetaAgent(index, evaluation_function, args.depths[index])
         elif player_type == "rl_agent":
-            ql_index = 0
-            depth = 2
-            file_name = f"qlearning_player_ws_{args.winning_streak}_players_2_shape_{args.board_shape}_index_{ql_index}_depth_{depth}.pkl"
-            full_path = compute_path_to_rl_agent_file(file_name)
-            if args.load_rl_agent:
-                with open(full_path, 'rb') as file_object:
-                    q_learning_player = pickle.load(file_object)
-                    q_learning_player.set_is_learning(False)
-                    q_learning_player.set_exploration_decay(0.995)
-                    return q_learning_player
-            else:
-                return QLearningPlayer(index, args.board_shape, currently_learning=False)
+            return PlayerFactory.create_rl_agent(args.winning_streak, args.board_shape, 0, 2, args.load_rl_agent)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
+    @staticmethod
+    def create_rl_agent(winning_streak, board_shape, ql_index, depth, load_rl_agent):
+        if load_rl_agent:
+            file_name = PlayerFactory.get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth)
+            full_path = compute_path_to_rl_agent_qtable(file_name)
+            with open(full_path, 'rb') as file_object:
+                q_table = pickle.load(file_object)
+                return QLearningPlayer(ql_index, board_shape, currently_learning=False, q_table=q_table)
+
+        return QLearningPlayer(ql_index, board_shape, currently_learning=False, q_table=None)
+
+    @staticmethod
+    def get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth):
+        return f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
     @staticmethod
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
