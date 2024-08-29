@@ -10,7 +10,7 @@ import os
 
 def compute_path_to_rl_agent_qtable(relative_file_name):
     current_directory = os.getcwd()
-    return current_directory + "/" + relative_file_name
+    return current_directory + "/q_tables_for_rl_agents/" + relative_file_name
 
 
 
@@ -307,8 +307,7 @@ class PlayerFactory:
     def create_rl_agent(winning_streak, board_shape, ql_index, depth, load_rl_agent):
         if load_rl_agent:
             file_name = PlayerFactory.get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth)
-            full_path = compute_path_to_rl_agent_qtable(file_name)
-            with open(full_path, 'rb') as file_object:
+            with open(file_name, 'rb') as file_object:
                 q_table = pickle.load(file_object)
                 return QLearningPlayer(ql_index, board_shape, currently_learning=False, q_table=q_table)
 
@@ -316,7 +315,9 @@ class PlayerFactory:
 
     @staticmethod
     def get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth):
-        return f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
+        file_name = f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
+        current_directory = os.getcwd()
+        return current_directory + "/q_tables_for_rl_agents/" + file_name
     @staticmethod
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
