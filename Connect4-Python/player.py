@@ -5,6 +5,7 @@ from abc import abstractmethod
 
 from evaluation_functions import *
 from game import Game
+from board import Board
 import pickle
 import os
 
@@ -88,7 +89,7 @@ class MultiAgentSearchAgent(Player):
 
     @abstractmethod
     def _get_action(self, board, num_of_players, winning_streak, ui=None):
-        return
+        raise NotImplementedError()
 
     def get_step_average_time(self):
         return np.mean(self.step_times)
@@ -189,8 +190,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
 class BaselinePlayer(MultiAgentSearchAgent):
     def __init__(self, index, evaluation_function=None):
-        super(MultiAgentSearchAgent, self).__init__(index)
-        self.evaluation_function = evaluation_function
+        super().__init__(index, evaluation_function)
         self.step_times = []
 
     def _get_action(self, board, num_of_players, winning_streak, ui=None):
@@ -225,7 +225,7 @@ class QLearningPlayer(Player):
         def __call__(self):
             return np.zeros((self.board_shape[1], self.board_shape[2]))
 
-    def __init__(self, index, board_shape, currently_learning=False, q_table=None, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=1):
+    def __init__(self, index, board_shape, num_of_players, currently_learning=False, q_table=None, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=1):
         super().__init__(index)
         self.currently_learning = currently_learning
         self.step_times = []
@@ -233,18 +233,26 @@ class QLearningPlayer(Player):
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
         self.exploration_decay = exploration_decay
+        self.opponents = []
+        self.create_opponents(num_of_players)
         if q_table is None:
             action_creator = QLearningPlayer.ActionCreator(board_shape)
             self.q_table = defaultdict(action_creator)
         else:
             self.q_table = q_table
 
+    def create_opponents(self, num_of_players):
+        cur_opponent = self.get_next_player(self.index, num_of_players)
+        while cur_opponent != self.index:
+            self.opponents.append(BaselinePlayer(cur_opponent, offensive_evaluation_function))
+            cur_opponent = self.get_next_player(cur_opponent, num_of_players)
+
     def set_is_learning(self, is_currently_learning):
         self.currently_learning = is_currently_learning
     def set_exploration_decay(self, exploration_decay):
         self.exploration_decay = exploration_decay
 
-    def get_action(self, board, num_of_players, winning_streak, ui=None):
+    def get_action(self, board: Board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
         state = self.get_state_representation(board)
         legal_actions = board.get_legal_actions(winning_streak)
@@ -268,35 +276,54 @@ class QLearningPlayer(Player):
         self.step_times.append(time_taken)
         return action
 
-    def monte_carlo_simulation(self, board, num_of_players, winning_streak, steps=None):
-        next_board = board.__copy__()
-        cur_player = self.get_next_player(self.index, num_of_players)
-        i = 0
-        while steps is None or i < steps:
+    # def monte_carlo_simulation(self, board, num_of_players, winning_streak, steps=None):
+    #     next_board = board.__copy__()
+    #     cur_player = self.get_next_player(self.index, num_of_players)
+    #     i = 0
+    #     while steps is None or i < steps:
+    #         if next_board.have_we_won(winning_streak):
+    #             return cur_player
+    #         elif next_board.is_board_full():
+    #             return Game.TIE
+    #         legal_actions = next_board.get_legal_actions(winning_streak)
+    #         action = random.choice(legal_actions)
+    #         next_board = next_board.generate_successor(cur_player, location=action, winning_streak=winning_streak)
+    #         cur_player = self.get_next_player(cur_player, num_of_players)
+    #         i += 1
+    #
+    #     return Game.TIE
+
+    def calculate_reward(self, board, num_of_players, winning_streak):
+        if board.have_we_won(winning_streak):
+            return 1000000
+        if board.is_board_full():
+            return -1
+        if self.can_opponent_win(board, num_of_players, winning_streak):
+            return -1000000
+        return -1
+
+    def can_opponent_win(self, board, num_of_players, winning_streak):
+        cur_player_index = self.get_next_player(self.index, num_of_players)
+        while cur_player_index != self.index:
+            cur_player = self.opponents[cur_player_index - 1]
+            action = cur_player.get_action(board, num_of_players, winning_streak)
+            next_board = board.generate_successor(cur_player_index, action, winning_streak)
             if next_board.have_we_won(winning_streak):
-                return cur_player
-            elif next_board.is_board_full():
-                return Game.TIE
-            legal_actions = next_board.get_legal_actions(winning_streak)
-            action = random.choice(legal_actions)
-            next_board = next_board.generate_successor(cur_player, location=action, winning_streak=winning_streak)
-            cur_player = self.get_next_player(cur_player, num_of_players)
-            i += 1
+                return True
+            cur_player_index = self.get_next_player(cur_player_index, num_of_players)
+        return False
 
-        return Game.TIE
-
-    def calculate_reward(self, board, num_of_players, winning_streak, num_of_simulations=10):
-        reward = 0
-        for i in range(num_of_simulations):
-            result = self.monte_carlo_simulation(board, num_of_players, winning_streak)
-            if result == self.index:
-                reward += 1000
-            elif result == Game.TIE:
-                pass
-            else:
-                reward -= 1000
-
-        return reward / num_of_simulations
+        # reward = 0
+        # for i in range(num_of_simulations):
+        #     result = self.monte_carlo_simulation(board, num_of_players, winning_streak)
+        #     if result == self.index:
+        #         reward += 1000000
+        #     elif result == Game.TIE:
+        #         pass
+        #     else:
+        #         reward -= 1000000
+        #
+        # return reward / num_of_simulations
 
 
 
@@ -341,27 +368,28 @@ class PlayerFactory:
         elif player_type == "alpha_beta":
             return AlphaBetaAgent(index, evaluation_function, args.depths[index], eval_func_return_depth, args.gamma[index])
         elif player_type == "rl_agent":
-            return PlayerFactory.create_rl_agent(args.winning_streak, args.board_shape, 0, 2, args.load_rl_agent)
+            return PlayerFactory.create_rl_agent(args, index)
         elif player_type == "baseline":
             return BaselinePlayer(index, evaluation_function)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
     @staticmethod
-    def create_rl_agent(winning_streak, board_shape, ql_index, depth, load_rl_agent):
-        if load_rl_agent:
-            file_name = PlayerFactory.get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth)
+    def create_rl_agent(args, index):
+        if args.load_rl_agent:
+            file_name = PlayerFactory.get_rl_agent_save_path(args.winning_streak, args.board_shape, index, args.depths[1-index])
             with open(file_name, 'rb') as file_object:
                 q_table = pickle.load(file_object)
-                return QLearningPlayer(ql_index, board_shape, currently_learning=False, q_table=q_table)
+                return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=q_table)
 
-        return QLearningPlayer(ql_index, board_shape, currently_learning=False, q_table=None)
+        return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=None)
 
     @staticmethod
     def get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth):
         file_name = f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
         current_directory = os.getcwd()
         return current_directory + "/q_tables_for_rl_agents/" + file_name
+
     @staticmethod
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
