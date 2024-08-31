@@ -69,6 +69,8 @@ class CnnAgent:
         loss_arr_test.append(test_loss)
 
     def create_data_set(self, path_to_q_table, num_of_players):
+        # the qtable dataset contains 732597 keys
+        #the board_grades contains 697848 entries
         # create a data set for the model from the q_table
         q_table = utils.get_qtable_from_file(path_to_q_table)
         board_grades = {}
@@ -84,10 +86,10 @@ class CnnAgent:
                 if board_key not in board_grades:
                     board_grades[board_key] = []
                 board_grades[board_key].append(value)
-        data = torch.tensor.zeros(len(board_grades), num_of_players, self.board_shape[0], self.board_shape[1])
-        labels = torch.tensor.zeros(len(board_grades))
+        data = torch.zeros(len(board_grades), num_of_players, self.board_shape[0], self.board_shape[1])
+        labels = torch.zeros(len(board_grades))
         for i, (key_board, grades) in enumerate(board_grades.items()):
-            board = np.array(key_board).reshape(self.board_shape[0], self.board_shape[1])
+            board = torch.tensor(key_board).reshape((self.board_shape[0], self.board_shape[1]))
             board = self.board_to_one_hot_board(board, num_of_players)
             value = sum(grades) / len(grades)
             data[i, ...] = board
@@ -96,9 +98,10 @@ class CnnAgent:
         return dataset
 
     def board_to_one_hot_board(self, board, num_of_players):
-        one_hot_board = np.zeros((num_of_players, self.board_shape[0], self.board_shape[1]))
+        one_hot_board = torch.zeros((num_of_players, self.board_shape[0], self.board_shape[1]))
         for i in range(num_of_players):
-            one_hot_board[i, ...] = (board == i).as_type(np.int8)
+            one_hot_board[i, ...] = (board == i).to(torch.int8)
+        return one_hot_board
 
     def place_disc(self, board, col, player_index):
         board = board.copy()
