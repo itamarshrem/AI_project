@@ -70,8 +70,7 @@ class CnnAgent:
 
     def create_data_set(self, path_to_q_table, num_of_players):
         # create a data set for the model from the q_table
-        with open(path_to_q_table, 'rb') as file:
-            q_table = pickle.load(file)
+        q_table = utils.get_qtable_from_file(path_to_q_table)
         board_grades = {}
         for state, action_values in q_table.items():
             board = np.array(state).reshape(*self.board_shape)
@@ -79,7 +78,7 @@ class CnnAgent:
             action_values = action_values[:, 0]
             for col, value in enumerate(action_values):
                 if value == 0:
-                    pass
+                    continue
                 board = self.place_disc(board, col, self.player_index)
                 board_key = tuple(board.flatten())
                 if board_key not in board_grades:
@@ -136,4 +135,21 @@ class CNN(nn.Module):
     def predict(self, x):
         return self.forward(torch.tensor(x, dtype=torch.float32)).detach().numpy()
 
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser()
+    default_players_num = 2
+    parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[6, 7, 1], help='size of the board')
+    parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
+    parser.add_argument('-ng', '--num_of_games', type=int, default=1, help='Number of consecutive games')
+
+    return parser.parse_args()
+def main():
+    model = None
+    args = parse_args()
+    cnn_agent = CnnAgent(model, 0, 4, args.board_shape)
+    full_path_filename = utils.get_rl_agent_save_path(4, args.board_shape, 0, 2)
+    cnn_agent.create_data_set(full_path_filename, 2)
+
 if __name__ == '__main__':
+    main()
