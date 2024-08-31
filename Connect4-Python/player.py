@@ -1,17 +1,10 @@
-import abc
 import random
 import time
 from abc import abstractmethod
 
 from evaluation_functions import *
-from game import Game
 from board import Board
-import pickle
-import os
-
-def compute_path_to_rl_agent_qtable(relative_file_name):
-    current_directory = os.getcwd()
-    return current_directory + "/q_tables_for_rl_agents/" + relative_file_name
+import utils
 
 
 
@@ -377,18 +370,13 @@ class PlayerFactory:
     @staticmethod
     def create_rl_agent(args, index):
         if args.load_rl_agent:
-            file_name = PlayerFactory.get_rl_agent_save_path(args.winning_streak, args.board_shape, index, args.depths[1-index])
-            with open(file_name, 'rb') as file_object:
-                q_table = pickle.load(file_object)
-                return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=q_table)
+            full_path_filename = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, index,
+                                                              args.depths[1 - index])
+            utils.extract_files_from_zip(args.winning_streak, args.board_shape, index, args.depths[1-index])
+            q_table = utils.get_qtable_from_file(full_path_filename)
+            return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=q_table)
 
         return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=None)
-
-    @staticmethod
-    def get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth):
-        file_name = f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
-        current_directory = os.getcwd()
-        return current_directory + "/q_tables_for_rl_agents/" + file_name
 
     @staticmethod
     def get_evaluation_function(evaluation_function):

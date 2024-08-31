@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from board import Board
 from torch.utils.data import DataLoader, TensorDataset
+import utils
 
 class CnnAgent:
     # by getting a board the agent will run a cnn model to get the value of the model and than return the best action
@@ -134,3 +135,5 @@ class CNN(nn.Module):
 
     def predict(self, x):
         return self.forward(torch.tensor(x, dtype=torch.float32)).detach().numpy()
+
+if __name__ == '__main__':
