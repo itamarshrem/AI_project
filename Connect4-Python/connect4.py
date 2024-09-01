@@ -7,7 +7,7 @@ import numpy as np
 from game import Game
 from player import PlayerFactory
 from winning_patterns import WinningPatterns
-import pickle
+import utils
 
 
 def parse_args():
@@ -16,7 +16,7 @@ def parse_args():
     default_players_num = 2
     parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[6, 7, 1], help='size of the board')
     parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline"], help='human, random, minmax, alpha_beta, rl_agent, baseline')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "all_complex", "simple",  "defensive", "offensive", "ibef", "none"], help='simple, all_complex, simple, defensive, offensive, ibef, none')
+    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "all_complex",  "defensive", "offensive", "ibef", "none"], help='simple, all_complex, defensive, offensive, ibef, none')
     parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
     parser.add_argument('-g', '--gamma', type=float, nargs="*", default=[0] * default_players_num, help='probability of random action of MultiAgentSearchAgent')
     parser.add_argument('-ws', '--winning_streak', type=int, default=4, help='Number of consecutive pieces to win')
@@ -72,24 +72,12 @@ def run_all_games(num_of_games, game, display_screen, board_configuration, board
             print(f"player {player.index} average step time: {step_time_average}")
 
 
-# def train_qlearning_player(num_of_games, board_shape, winning_streak, load_qlearning_player=False):
-#     ql_index = 0
-#     depth = 2
-#     qlearning_player = PlayerFactory.create_rl_agent(winning_streak, board_shape, ql_index, depth, load_qlearning_player)
-#     minmax_player = PlayerFactory.get_player("minmax", 1 - ql_index, args)
-#     players = [qlearning_player, minmax_player]
-#     game = Game(winning_streak, players, sleep_between_actions=False)
-#     run_all_games(num_of_games, game, False, "None", board_shape)
-#     # save the qlearning player
-#     file_name = PlayerFactory.get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth)
-#     with open(file_name, 'wb') as file_object:
-#         pickle.dump(qlearning_player.q_table, file_object)
 
 def save_rl_agent(args, players):
     ql_index = args.players.index("rl_agent")
-    file_name = PlayerFactory.get_rl_agent_save_path(args.winning_streak, args.board_shape, ql_index, args.depths[1 - ql_index])
-    with open(file_name, 'wb') as file_object:
-        pickle.dump(players[ql_index].q_table, file_object)
+    file_name = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, ql_index, args.depths[1 - ql_index])
+    utils.save_rl_agent_qtable(file_name, players[ql_index])
+    utils.zip_rl_agent_qtable(file_name)
 
 
 def main(args):
@@ -107,4 +95,3 @@ if __name__ == '__main__':
     validate_input(args)
     WinningPatterns.build_shapes(args.winning_streak, args.board_shape)
     main(args)
-    # train_qlearning_player(args.num_of_games, args.board_shape, args.winning_streak, load_qlearning_player=False)

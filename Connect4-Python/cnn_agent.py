@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from board import Board
 from torch.utils.data import DataLoader, TensorDataset
+import utils
 
 class CnnAgent:
     # by getting a board the agent will run a cnn model to get the value of the model and than return the best action
@@ -68,9 +69,10 @@ class CnnAgent:
         loss_arr_test.append(test_loss)
 
     def create_data_set(self, path_to_q_table, num_of_players):
+        # the qtable dataset contains 732597 keys
+        #the board_grades contains 697848 entries
         # create a data set for the model from the q_table
-        with open(path_to_q_table, 'rb') as file:
-            q_table = pickle.load(file)
+        q_table = utils.get_qtable_from_file(path_to_q_table)
         board_grades = {}
         for state, action_values in q_table.items():
             board = np.array(state).reshape(*self.board_shape)
@@ -78,16 +80,16 @@ class CnnAgent:
             action_values = action_values[:, 0]
             for col, value in enumerate(action_values):
                 if value == 0:
-                    pass
+                    continue
                 board = self.place_disc(board, col, self.player_index)
                 board_key = tuple(board.flatten())
                 if board_key not in board_grades:
                     board_grades[board_key] = []
                 board_grades[board_key].append(value)
-        data = torch.tensor.zeros(len(board_grades), num_of_players, self.board_shape[0], self.board_shape[1])
-        labels = torch.tensor.zeros(len(board_grades))
+        data = torch.zeros(len(board_grades), num_of_players, self.board_shape[0], self.board_shape[1])
+        labels = torch.zeros(len(board_grades))
         for i, (key_board, grades) in enumerate(board_grades.items()):
-            board = np.array(key_board).reshape(self.board_shape[0], self.board_shape[1])
+            board = torch.tensor(key_board).reshape((self.board_shape[0], self.board_shape[1]))
             board = self.board_to_one_hot_board(board, num_of_players)
             value = sum(grades) / len(grades)
             data[i, ...] = board
@@ -96,9 +98,10 @@ class CnnAgent:
         return dataset
 
     def board_to_one_hot_board(self, board, num_of_players):
-        one_hot_board = np.zeros((num_of_players, self.board_shape[0], self.board_shape[1]))
+        one_hot_board = torch.zeros((num_of_players, self.board_shape[0], self.board_shape[1]))
         for i in range(num_of_players):
-            one_hot_board[i, ...] = (board == i).as_type(np.int8)
+            one_hot_board[i, ...] = (board == i).to(torch.int8)
+        return one_hot_board
 
     def place_disc(self, board, col, player_index):
         board = board.copy()
@@ -134,3 +137,45 @@ class CNN(nn.Module):
 
     def predict(self, x):
         return self.forward(torch.tensor(x, dtype=torch.float32)).detach().numpy()
+
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser()
+    default_players_num = 2
+    parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[6, 7, 1], help='size of the board')
+    parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
+    parser.add_argument('-ng', '--num_of_games', type=int, default=1, help='Number of consecutive games')
+
+    return parser.parse_args()
+def main():
+    model = None
+    args = parse_args()
+    cnn_agent = CnnAgent(model, 0, 4, args.board_shape)
+    full_path_filename = utils.get_rl_agent_save_path(4, args.board_shape, 0, 2)
+    dataset = cnn_agent.create_data_set(full_path_filename, 2)
+
+    # save dataset to Connect4-Python/cnn/cnn_dataset.pt
+    torch.save(dataset, 'cnn/cnn_dataset.pt')
+
+    # dataset = torch.load('cnn/cnn_dataset.pt')
+    train, test = torch.utils.data.random_split(dataset, [int(0.8 * len(dataset)), len(dataset) - int(0.8 * len(dataset))])
+    train_loader = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
+    test_loader = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True)
+
+    # run the model on mac with cpu and on colab with gpu
+    model = CNN(args.board_shape, 4, 2).to(device)
+    loss_fn = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+
+    loss_arr_train = []
+    loss_arr_test = []
+    for epoch in range(EPOCHS):
+        print(f'Epoch {epoch + 1}\n-------------------------------')
+        cnn_agent.train_model(train_loader, model, loss_fn, optimizer, loss_arr_train)
+        cnn_agent.test_model(test_loader, model, loss_fn, loss_arr_test)
+    print('Done!')
+    torch.save(model, 'cnn/cnn_model.pt')
+    print('Model saved!')
+
+if __name__ == '__main__':
+    main()
