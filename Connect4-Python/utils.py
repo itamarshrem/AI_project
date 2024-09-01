@@ -4,7 +4,9 @@ import pickle
 
 def find_q_tables_dir():
     current_directory = os.getcwd()
-    return os.path.join(current_directory, "q_tables_for_rl_agents")
+    current_directory = current_directory.split("Connect4-Python")[0]
+    connect_four_dir = os.path.join(current_directory, "Connect4-Python")
+    return os.path.join(connect_four_dir, "q_tables_for_rl_agents")
 
 
 def create_qtable_filename(winning_streak, board_shape, ql_index, depth):
