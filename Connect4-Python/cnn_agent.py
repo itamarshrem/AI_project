@@ -158,7 +158,7 @@ def main():
     torch.save(dataset, 'cnn/cnn_dataset.pt')
 
     # dataset = torch.load('cnn/cnn_dataset.pt')
-    train, test = torch.utils.data.random_split(dataset, [int(0.8 * len(dataset)), len(dataset) - int(0.8 * len(dataset)])
+    train, test = torch.utils.data.random_split(dataset, [int(0.8 * len(dataset)), len(dataset) - int(0.8 * len(dataset))])
     train_loader = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True)
 
