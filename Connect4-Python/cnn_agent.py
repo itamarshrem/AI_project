@@ -152,7 +152,30 @@ def main():
     args = parse_args()
     cnn_agent = CnnAgent(model, 0, 4, args.board_shape)
     full_path_filename = utils.get_rl_agent_save_path(4, args.board_shape, 0, 2)
-    cnn_agent.create_data_set(full_path_filename, 2)
+    dataset = cnn_agent.create_data_set(full_path_filename, 2)
+
+    # save dataset to Connect4-Python/cnn/cnn_dataset.pt
+    torch.save(dataset, 'cnn/cnn_dataset.pt')
+
+    # dataset = torch.load('cnn/cnn_dataset.pt')
+    train, test = torch.utils.data.random_split(dataset, [int(0.8 * len(dataset)), len(dataset) - int(0.8 * len(dataset)])
+    train_loader = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
+    test_loader = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True)
+
+    # run the model on mac with cpu and on colab with gpu
+    model = CNN(args.board_shape, 4, 2).to(device)
+    loss_fn = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+
+    loss_arr_train = []
+    loss_arr_test = []
+    for epoch in range(EPOCHS):
+        print(f'Epoch {epoch + 1}\n-------------------------------')
+        cnn_agent.train_model(train_loader, model, loss_fn, optimizer, loss_arr_train)
+        cnn_agent.test_model(test_loader, model, loss_fn, loss_arr_test)
+    print('Done!')
+    torch.save(model, 'cnn/cnn_model.pt')
+    print('Model saved!')
 
 if __name__ == '__main__':
     main()
