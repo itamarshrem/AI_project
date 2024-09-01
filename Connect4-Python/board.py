@@ -4,7 +4,7 @@ from scipy.signal import convolve
 
 class Board:
     EMPTY_CELL = -1
-    def __init__(self, rows, cols, depth=1, num_of_players=2, board=None, build_conv_res_by_direction=True):
+    def __init__(self, rows, cols, depth=1, num_of_players=2, board=None, conv_res_dict=None):
         if board is None:
             self._board = np.ones((rows, cols, depth)) * self.EMPTY_CELL
             self.rows = rows
@@ -16,17 +16,18 @@ class Board:
         self.last_disc_location = None
         self.num_of_players = num_of_players
         self.conv_res_by_direction = {}
-        if build_conv_res_by_direction:
+        if conv_res_dict is None:
             self._build_conv_res_by_direction()
+        else:
+            self.conv_res_by_direction = conv_res_dict
 
     def _build_conv_res_by_direction(self):
-        self.conv_res_by_direction = {}
         for direction, res_shape in WinningPatterns.CONV_RES_SHAPES.items():
             rows, cols, depth = res_shape
             self.conv_res_by_direction[direction] = np.zeros((self.num_of_players, rows, cols, depth))
 
     def __copy__(self):
-        b = Board(self.rows, self.cols, self.depth, self.num_of_players, self._board.copy(), False)
+        b = Board(self.rows, self.cols, self.depth, self.num_of_players, self._board.copy(), {})
         # b.conv_res_by_direction = self.conv_res_by_direction
         # deep copy the conv_res_by_direction
         b.conv_res_by_direction = {k: v.copy() for k, v in self.conv_res_by_direction.items()}

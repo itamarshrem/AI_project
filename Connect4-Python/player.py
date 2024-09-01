@@ -200,14 +200,19 @@ class BaselinePlayer(MultiAgentSearchAgent):
             value = self.evaluation_function(successor, self.index, num_of_players, winning_streak)
             actions_values.append(value)
 
-        actions_values = np.array(actions_values)
+        # actions_values = np.array(actions_values)
         # apply softmax on the values and choose a random action based on the probabilities
         # probabilities = np.exp(actions_values) / np.sum(np.exp(actions_values))
         # action = legal_actions[np.random.choice(len(legal_actions), p=probabilities)]
 
         # choose the action with the highest value
-        action = legal_actions[np.argmax(actions_values)]
-        return action
+        max_value = actions_values[0]
+        max_action = legal_actions[0]
+        for i in range(1, len(actions_values)):
+            if actions_values[i] > max_value:
+                max_value = actions_values[i]
+                max_action = legal_actions[i]
+        return max_action
 
 
 class QLearningPlayer(Player):

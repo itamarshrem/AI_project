@@ -113,14 +113,14 @@ def defensive_evaluation_function(board, player_index, num_of_players, winning_s
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
-    return -max_opponents_streaks  * max_opponents_streaks_app
+    return -max_opponents_streaks, -max_opponents_streaks_app
 
 
 def offensive_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
-    return cur_player_max_streak  * cur_player_max_streak_app
+    return cur_player_max_streak, cur_player_max_streak_app
 
 
 
