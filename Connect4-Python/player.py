@@ -382,7 +382,7 @@ class PlayerFactory:
             return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=q_table)
 
         return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=None)
-
+    
     @staticmethod
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
