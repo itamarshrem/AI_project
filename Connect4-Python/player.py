@@ -326,6 +326,7 @@ class QLearningPlayer(Player):
 
 
     def learn(self, board, action, reward, next_board):
+        action = tuple(action)
         state = self.get_state_representation(board)
         next_state = self.get_state_representation(next_board)
 

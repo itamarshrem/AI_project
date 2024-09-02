@@ -1,9 +1,8 @@
 import numpy as np
 import torch
 from torch import nn
-# from board import Board
 from torch.utils.data import DataLoader, TensorDataset
-# import utils
+import utils
 import pickle
 
 EMPTY_CELL = -1
@@ -155,34 +154,37 @@ def parse_args():
     parser.add_argument('-ng', '--num_of_games', type=int, default=1, help='Number of consecutive games')
 
     return parser.parse_args()
+
 def main():
-    args = parse_args()
-    # full_path_filename = utils.get_rl_agent_save_path(4, args.board_shape, 0, 2)
-    # dataset = cnn_agent.create_data_set(full_path_filename, 2)
+    # args = parse_args()
+    full_path_filename = utils.get_rl_agent_save_path(4, [6, 7, 1], 0, 2)
+    cnn_model = CNN((2, 6, 7), 4)
+    cnn_agent = CnnAgent(cnn_model, 0, 4, (6, 7, 1))
+    dataset = cnn_agent.create_data_set(full_path_filename, 2)
+
+    # save dataset to Connect4-Python/cnn/cnn_dataset.pt
+    torch.save(dataset, 'Connect4-Python/cnn/cnn_dataset.pt')
+
+    # dataset = torch.load('cnn/cnn_dataset.pt')
+    # train, test = torch.utils.data.random_split(dataset, [int(0.8 * len(dataset)), len(dataset) - int(0.8 * len(dataset))])
+    # train_loader = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
+    # test_loader = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True)
+    # num_of_players = 2
+    # # run the model on mac with cpu and on colab with gpu
+    # cnn_agent = CnnAgent(args.board_shape, 0, args.winning_streak, num_of_players)
+    # cnn_model = CNN(args.board_shape, args.winning_streak, num_of_players)
+    # loss_fn = nn.MSELoss()
+    # optimizer = torch.optim.Adam(cnn_model.parameters(), lr=LR)
     #
-    # # save dataset to Connect4-Python/cnn/cnn_dataset.pt
-    # torch.save(dataset, 'cnn/cnn_dataset.pt')
-
-    dataset = torch.load('cnn/cnn_dataset.pt')
-    train, test = torch.utils.data.random_split(dataset, [int(0.8 * len(dataset)), len(dataset) - int(0.8 * len(dataset))])
-    train_loader = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
-    test_loader = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True)
-    num_of_players = 2
-    # run the model on mac with cpu and on colab with gpu
-    cnn_agent = CnnAgent(args.board_shape, 0, args.winning_streak, num_of_players)
-    cnn_model = CNN(args.board_shape, args.winning_streak, num_of_players)
-    loss_fn = nn.MSELoss()
-    optimizer = torch.optim.Adam(cnn_model.parameters(), lr=LR)
-
-    loss_arr_train = []
-    loss_arr_test = []
-    for epoch in range(EPOCHS):
-        print(f'Epoch {epoch + 1}\n-------------------------------')
-        cnn_agent.train_model(train_loader, cnn_model, loss_fn, optimizer, loss_arr_train)
-        cnn_agent.test_model(test_loader, cnn_model, loss_fn, loss_arr_test)
-        torch.save(cnn_agent, 'cnn/cnn_model_weights.pt')
-    print('Done!')
-    print('Model saved!')
+    # loss_arr_train = []
+    # loss_arr_test = []
+    # for epoch in range(EPOCHS):
+    #     print(f'Epoch {epoch + 1}\n-------------------------------')
+    #     cnn_agent.train_model(train_loader, cnn_model, loss_fn, optimizer, loss_arr_train)
+    #     cnn_agent.test_model(test_loader, cnn_model, loss_fn, loss_arr_test)
+    #     torch.save(cnn_agent, 'cnn/cnn_model_weights.pt')
+    # print('Done!')
+    # print('Model saved!')
 
 if __name__ == '__main__':
     main()
