@@ -1,10 +1,14 @@
 import random
 import time
-from abc import abstractmethod
+import torch
+import utils
 
+from abc import abstractmethod
 from evaluation_functions import *
 from board import Board
-import utils
+from cnn import CNN
+
+
 
 
 
@@ -231,6 +235,7 @@ class QLearningPlayer(Player):
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
         self.exploration_decay = exploration_decay
+        self.turns_until_endgame = 0
         self.opponents = []
         self.create_opponents(num_of_players)
         if q_table is None:
@@ -247,6 +252,7 @@ class QLearningPlayer(Player):
 
     def set_is_learning(self, is_currently_learning):
         self.currently_learning = is_currently_learning
+
     def set_exploration_decay(self, exploration_decay):
         self.exploration_decay = exploration_decay
 
@@ -259,7 +265,11 @@ class QLearningPlayer(Player):
             if np.random.rand() < self.exploration_rate:
                 action = random.choice(legal_actions)
             else:
-                q_values = self.q_table[state]
+                if state in self.q_table:
+                    q_values = self.q_table[state]
+                else:
+                    self.q_table[state] = np.zeros((board.board.shape[1], board.board.shape[2]))
+                    q_values = self.q_table[state]
                 q_values_for_legal_actions = q_values[legal_actions_indices]
                 action = legal_actions[np.argmax(q_values_for_legal_actions)]
 
@@ -267,7 +277,13 @@ class QLearningPlayer(Player):
             reward = self.calculate_reward(next_board, num_of_players, winning_streak)
             self.learn(board, action, reward, next_board)
         else:
-            q_values = self.q_table[state]
+            if state in self.q_table:
+                q_values = self.q_table[state]
+            else:
+                steps_taken = np.ceil(np.sum(board.board != -1) / num_of_players)
+                print("State not found in q_table, number of steps taken", steps_taken)
+                self.q_table[state] = np.zeros((board.board.shape[1], board.board.shape[2]))
+                q_values = self.q_table[state]
             q_values_for_legal_actions = q_values[legal_actions_indices]
             action = legal_actions[np.argmax(q_values_for_legal_actions)]
         time_taken = time.time() - start_time
@@ -293,11 +309,12 @@ class QLearningPlayer(Player):
 
     def calculate_reward(self, board, num_of_players, winning_streak):
         if board.have_we_won(winning_streak):
-            return 1000000
+            return 500
         if board.is_board_full():
-            return -1
+            return 200
         if self.can_opponent_win(board, num_of_players, winning_streak):
-            return -1000000
+            return -500 + self.turns_until_endgame
+        self.turns_until_endgame += 2
         return -1
 
     def can_opponent_win(self, board, num_of_players, winning_streak):
@@ -353,6 +370,43 @@ class QLearningPlayer(Player):
         return np.mean(self.step_times)
 
 
+class CnnAgent(Player):
+    # by getting a board the agent will run a cnn model to get the value of the model and than return the best action
+
+    def __init__(self, model, player_index, winning_streak, board_shape, num_of_players):
+        super().__init__(player_index)
+        self.model = model
+        self.player_index = player_index
+        self.winning_streak = winning_streak
+        self.board_shape = board_shape
+        self.num_of_players = num_of_players
+
+    def get_action(self, board, num_of_players, winning_streak, ui=None):
+        # get the best action
+        action = self._get_best_action(board)
+        return action
+
+    def _get_board_value(self, board):
+        # get the value of the board
+
+        return self.model.predict(board)
+
+    def _get_best_action(self, board):
+        # get the best action
+        legal_actions = board.get_legal_actions(self.winning_streak)
+        best_action = None
+        best_value = -float('inf')
+        for action in legal_actions:
+            board_copy = board.__copy__()
+            board_copy.apply_action(action, self.player_index, self.winning_streak)
+            board_for_cnn = utils.pre_process_board(board_copy.board, board.board.shape, self.num_of_players)
+            action_value = self._get_board_value(board_for_cnn)
+            if action_value > best_value:
+                best_value = action_value
+                best_action = action
+        return best_action
+
+
 class PlayerFactory:
     @staticmethod
     def get_player(player_type, index, args):
@@ -370,6 +424,12 @@ class PlayerFactory:
             return PlayerFactory.create_rl_agent(args, index)
         elif player_type == "baseline":
             return BaselinePlayer(index, evaluation_function)
+        elif player_type == 'cnn_agent':
+            rows, cols, depth = args.board_shape
+            num_of_players = len(args.players)
+            model = CNN((num_of_players, rows, cols), args.winning_streak)
+            model.load_state_dict(torch.load('Connect4-Python/cnn/cnn_model_weights.pth'))
+            return CnnAgent(model, index, args.winning_streak, args.board_shape, num_of_players)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
