@@ -89,8 +89,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-    random.seed(0)
-    np.random.seed(0)
+    # random.seed(0)
+    # np.random.seed(0)
     args = parse_args()
     validate_input(args)
     WinningPatterns.build_shapes(args.winning_streak, args.board_shape)
