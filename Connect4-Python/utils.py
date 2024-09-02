@@ -11,7 +11,8 @@ def find_q_tables_dir():
 
 
 def create_qtable_filename(winning_streak, board_shape, ql_index, depth):
-    return f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
+    # return f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}_depth_{depth}.pkl"
+    return f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}.pkl"
 
 
 def get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth):
