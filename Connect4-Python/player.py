@@ -280,7 +280,8 @@ class QLearningPlayer(Player):
             if state in self.q_table:
                 q_values = self.q_table[state]
             else:
-                # print("State not found in q_table, number of steps taken", self.turns_until_endgame)
+                number_of_steps = np.ceil(np.sum(board.board != -1) / num_of_players)
+                # print("State not found in q_table, number of steps taken", number_of_steps)
                 self.q_table[state] = np.zeros((board.board.shape[1], board.board.shape[2]))
                 q_values = self.q_table[state]
             q_values_for_legal_actions = q_values[legal_actions_indices]
