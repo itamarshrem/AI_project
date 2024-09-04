@@ -10,20 +10,20 @@ def find_q_tables_dir():
     return os.path.join(connect_four_dir, "q_tables_for_rl_agents")
 
 
-def create_qtable_filename(winning_streak, board_shape, ql_index, depth):
+def create_qtable_filename(winning_streak, board_shape, ql_index):
     return f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}.pkl"
 
 
-def get_rl_agent_save_path(winning_streak, board_shape, ql_index, depth):
-    file_name = create_qtable_filename(winning_streak, board_shape, ql_index, depth)
+def get_rl_agent_save_path(winning_streak, board_shape, ql_index):
+    file_name = create_qtable_filename(winning_streak, board_shape, ql_index)
     return os.path.join(find_q_tables_dir(), file_name)
 
 
-def extract_files_from_zip(winning_streak, board_shape, index, depth):
-    full_path_filename = get_rl_agent_save_path(winning_streak, board_shape, index, depth)
+def extract_files_from_zip(winning_streak, board_shape, index):
+    full_path_filename = get_rl_agent_save_path(winning_streak, board_shape, index)
     if os.path.isfile(full_path_filename):
         return
-    target_filename = create_qtable_filename(winning_streak, board_shape, index, depth)
+    target_filename = create_qtable_filename(winning_streak, board_shape, index)
     zip_filename = full_path_filename + ".zip"
     zip_directory = os.path.dirname(os.path.abspath(zip_filename))
     target_path = os.path.join(zip_directory, target_filename)

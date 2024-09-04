@@ -159,7 +159,7 @@ def main():
     should_create_dataset = True
 
     print("Running on:", device)
-    full_path_filename = utils.get_rl_agent_save_path(4, [6, 7, 1], 0, 2)
+    full_path_filename = utils.get_rl_agent_save_path(4, [6, 7, 1], 0)
     cnn_model = CNN((2, 6, 7), 4).to(device)
 
     if not train_from_zero:
