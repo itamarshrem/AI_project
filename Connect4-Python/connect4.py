@@ -71,7 +71,7 @@ def run_all_games(num_of_games, game, display_screen, board_configuration, board
 
 def save_rl_agent(args, players):
     ql_index = args.players.index("rl_agent")
-    file_name = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, ql_index, args.depths[1 - ql_index])
+    file_name = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, ql_index)
     utils.save_rl_agent_qtable(file_name, players[ql_index])
     utils.zip_rl_agent_qtable(file_name)
 

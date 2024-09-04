@@ -1,7 +1,7 @@
 import time
 from initial_boards import BoardFactory
 from user_interface import UIFactory
-
+from player import Player
 
 class Game:
     TIE = -1
@@ -14,13 +14,20 @@ class Game:
         self.board = None
         self._should_quit = False
 
+    def does_players_contain_rl(self):
+        for index, player in enumerate(self.players):
+            if player.is_rl():
+                return index
+        return -1
+
     def run(self, display_ui, board_configuration, board_shape):
         self._should_quit = False
         self.board = BoardFactory.get_board(board_configuration, board_shape, len(self.players))
         self.ui = UIFactory.getUI(display_ui, self.board)
         self.ui.display_board(self.board)
-        if self.players[0].is_rl() and self.players[0].is_currently_learning():
-            result = self._rl_game_loop()
+        rl_index = self.does_players_contain_rl()
+        if rl_index != -1 and self.players[rl_index].is_currently_learning():
+            result = self._rl_game_loop(rl_index, len(self.players))
         else:
             result = self._game_loop()
         self.display_result_in_ui(result)
@@ -47,18 +54,22 @@ class Game:
             player_index = (player_index + 1) % len(self.players)
         return self.TIE
 
-    def _rl_game_loop(self):
-        rl_index = 0
+    def _rl_game_loop(self, rl_index, num_of_players):
         rl_player = self.players[rl_index]
+        cur_player_index = 0
         winning_player = self.TIE
+        while cur_player_index != rl_index and winning_player == self.TIE and not self.board.is_board_full():
+            winning_player, _ = self.play_turn(cur_player_index)
+            cur_player_index = Player.get_next_player(cur_player_index, num_of_players)
+
         while winning_player == self.TIE and not self.board.is_board_full():
             board_before_rl = self.board.__copy__()
             winning_player, rl_action = self.play_turn(rl_index)
             board_after_rl = self.board.__copy__()
-            cur_player_index = 1
-            while cur_player_index < len(self.players) and (not self.board.is_board_full() and winning_player == self.TIE):
+            cur_player_index = Player.get_next_player(cur_player_index, num_of_players)
+            while cur_player_index != rl_index and (not self.board.is_board_full() and winning_player == self.TIE):
                 winning_player, _ = self.play_turn(cur_player_index)
-                cur_player_index += 1
+                cur_player_index = Player.get_next_player(cur_player_index, num_of_players)
             rl_player.update_q_table(board_before_rl, rl_action, board_after_rl, self.board, self.winning_streak)
         return winning_player
 

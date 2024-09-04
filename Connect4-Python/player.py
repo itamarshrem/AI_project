@@ -405,9 +405,8 @@ class PlayerFactory:
         #         opponents[i] = PlayerFactory.get_player(args.players[i], i, args)
 
         if args.load_rl_agent:
-            full_path_filename = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, index,
-                                                              args.depths[1 - index])
-            utils.extract_files_from_zip(args.winning_streak, args.board_shape, index, args.depths[1-index])
+            full_path_filename = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, index)
+            utils.extract_files_from_zip(args.winning_streak, args.board_shape, index)
             q_table = utils.get_qtable_from_file(full_path_filename)
             return QLearningPlayer(index, args.board_shape, len(args.players), currently_learning=args.rl_currently_learning, q_table=q_table)
 
