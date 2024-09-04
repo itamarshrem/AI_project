@@ -57,6 +57,7 @@ def print_results(results, num_of_games):
 def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape):
     results = defaultdict(lambda: 0)
     for i in range(num_of_games):
+        # save time
         start_time = time.time()
         game_result = game.run(display_screen, board_configuration, board_shape)
         results[game_result] += 1

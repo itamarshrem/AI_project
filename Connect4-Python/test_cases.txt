@@ -8,3 +8,13 @@ in each test, check win rate and running time
 6. run connect 4 3d(?)
 
 
+- run shalom's run with more games (maybe try the cnn then) - aboud
+- maybe train rl with master with depth 2 - aboud
+- modify baseline players to be probabilistic - shalom
+- generalize rl to work on 3d board - seems ok, should verify!!!!
+- generalize rl to work with different indices
+- generalize rl to work with multiple player
+- work on the report, add results section
+- ui to 3d
+
+
