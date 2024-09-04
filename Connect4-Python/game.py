@@ -16,7 +16,7 @@ class Game:
 
     def does_players_contain_rl(self):
         for index, player in enumerate(self.players):
-            if player.is_rl():
+            if player.__name__() == "QLearningPlayer":
                 return index
         return -1
 
