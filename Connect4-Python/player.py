@@ -28,13 +28,15 @@ class Player:
     def get_next_player(cur_player, num_of_players):
         return (cur_player + 1) % num_of_players
 
-    def is_rl(self):
-        return False
+
 
 class RandomPlayer(Player):
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         legal_actions = board.get_legal_actions(winning_streak)
         return legal_actions[np.random.choice(len(legal_actions))]
+
+    def __name__(self):
+        return "RandomPlayer"
 
 
 class HumanPlayer(Player):
@@ -43,6 +45,9 @@ class HumanPlayer(Player):
         while not board.is_valid_location(player_input):
             player_input = ui.get_player_input(self.index)
         return player_input
+
+    def __name__(self):
+        return "HumanPlayer"
 
 
 class MultiAgentSearchAgent(Player):
@@ -74,7 +79,6 @@ class MultiAgentSearchAgent(Player):
 
     def get_action(self, board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
-        # call _get_action if random is smaller than gamma
         if np.random.rand() >= self.gamma:
             action = self._get_action(board, num_of_players, winning_streak, ui)
         else:
@@ -82,7 +86,6 @@ class MultiAgentSearchAgent(Player):
             action = legal_actions[np.random.choice(len(legal_actions))]
         time_taken = time.time() - start_time
         self.step_times.append(time_taken)
-        # print(f"Time taken for move: {time_taken}")
         return action
 
     @abstractmethod
@@ -96,6 +99,9 @@ class MultiAgentSearchAgent(Player):
 
 class MinmaxAgent(MultiAgentSearchAgent):
 
+    def __name__(self):
+        return "MinmaxAgent_" + self.evaluation_function.__name__
+
     def _get_action(self, board, num_of_players, winning_streak, ui=None):
         legal_actions = board.get_legal_actions(winning_streak)
         if self.depth == 0 or not legal_actions:
@@ -105,7 +111,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
         next_player_index = self.get_next_player(self.index, num_of_players)
         for action in legal_actions:
             successor = board.generate_successor(self.index, location=action, winning_streak=winning_streak)
-            successor_value = self.__min_player(successor, self.depth, num_of_players, next_player_index, winning_streak)
+            successor_value = self.__min_player(successor, self.depth - 1, num_of_players, next_player_index, winning_streak)
             if successor_value > max_value_found or action_for_max_value is None:
                 max_value_found = successor_value
                 action_for_max_value = action
@@ -122,7 +128,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
             if next_player_index == self.index:
                 successor_value = self.__max_player(successor, cur_depth - 1, num_of_players, winning_streak)
             else:
-                successor_value = self.__min_player(successor, cur_depth, num_of_players, next_player_index, winning_streak)
+                successor_value = self.__min_player(successor, cur_depth - 1, num_of_players, next_player_index, winning_streak)
             if successor_value < min_value_found:
                 min_value_found = successor_value
         return min_value_found
@@ -135,7 +141,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
         next_player_index = self.get_next_player(self.index, num_of_players)
         for action in legal_actions:
             successor = cur_state.generate_successor(self.index, location=action, winning_streak=winning_streak)
-            successor_value = self.__min_player(successor, cur_depth, num_of_players, next_player_index, winning_streak)
+            successor_value = self.__min_player(successor, cur_depth - 1, num_of_players, next_player_index, winning_streak)
             if successor_value > max_value_found:
                 max_value_found = successor_value
         return max_value_found
@@ -146,11 +152,14 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
     """
 
+    def __name__(self):
+        return "AlphaBetaAgent_" + self.evaluation_function.__name__
+
     def _get_action(self, board, num_of_players, winning_streak, ui=None):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        action, value = self.__alphabeta_helper(board, self.index, self.depth + 1, self.MIN_SCORE, self.MAX_SCORE, num_of_players, winning_streak)
+        action, value = self.__alphabeta_helper(board, self.index, self.depth, self.MIN_SCORE, self.MAX_SCORE, num_of_players, winning_streak)
         return action
 
     def __alphabeta_helper(self, cur_state, next_player, cur_depth, a, b, num_of_players, winning_streak):
@@ -158,16 +167,14 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if cur_depth == 0 or not legal_actions:
             return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         if next_player == self.index:
-            return self.__max_helper(cur_state, next_player, cur_depth - 1, a, b, num_of_players, legal_actions, winning_streak)
+            return self.__max_helper(cur_state, next_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak)
         return self.__min_helper(cur_state, next_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak)
 
     def __max_helper(self, cur_state, cur_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak):
-        if cur_depth == 0 or not legal_actions:
-            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         max_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action, winning_streak=winning_streak)
-            _, new_a = self.__alphabeta_helper(successor, self.get_next_player(cur_player, num_of_players), cur_depth, a, b, num_of_players, winning_streak)
+            _, new_a = self.__alphabeta_helper(successor, self.get_next_player(cur_player, num_of_players), cur_depth - 1, a, b, num_of_players, winning_streak)
             if new_a > a or max_action is None:
                 a = new_a
                 max_action = action
@@ -176,10 +183,12 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return max_action, a
 
     def __min_helper(self, cur_state, cur_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak):
+        if cur_depth == 0 or not legal_actions:
+            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         min_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action, winning_streak=winning_streak)
-            _, new_b = self.__alphabeta_helper(successor, self.get_next_player(cur_player, num_of_players), cur_depth, a, b, num_of_players, winning_streak)
+            _, new_b = self.__alphabeta_helper(successor, self.get_next_player(cur_player, num_of_players), cur_depth - 1, a, b, num_of_players, winning_streak)
             if new_b < b or min_action is None:
                 b = new_b
                 min_action = action
@@ -189,6 +198,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
 
 class BaselinePlayer(MultiAgentSearchAgent):
+
+    def __name__(self):
+        return "BaselinePlayer_" + self.evaluation_function.__name__
+
     def __init__(self, index, evaluation_function=None):
         super().__init__(index, evaluation_function)
         self.step_times = []
@@ -224,6 +237,9 @@ class BaselinePlayer(MultiAgentSearchAgent):
 
 
 class QLearningPlayer(Player):
+
+    def __name__(self):
+        return "QLearningPlayer"
 
     def __init__(self, index, board_shape, num_of_players, with_master=True, currently_learning=False, q_table=None, learning_rate=0.1, discount_factor=0.8, exploration_rate=1, exploration_decay=0.9999539):
         super().__init__(index)
@@ -315,9 +331,6 @@ class QLearningPlayer(Player):
         This method returns a tuple that uniquely represents the state of the 3d board.
         """
         return tuple(board.board.flatten())
-
-    def is_rl(self):
-        return True
 
     def get_step_average_time(self):
         return np.mean(self.step_times)

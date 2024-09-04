@@ -46,30 +46,27 @@ def create_players(args):
     return players
 
 
-def print_results(results, num_of_games):
+def print_results(results, num_of_games, game):
     for player, count in results.items():
         if player == Game.TIE:
             print(f"number of ties: {count}, tie percentage: {(count * 100 / num_of_games)}%")
         else:
-            print(f"player {player} won {count} games, winning percentage: {count * 100 / num_of_games}%")
+            print(f"player {game.players[player].__name__()} (index {player}) won {count} games. winning percentage: {count * 100 / num_of_games}%")
 
 
 def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape):
     results = defaultdict(lambda: 0)
     for i in range(num_of_games):
-        # save time
         start_time = time.time()
         game_result = game.run(display_screen, board_configuration, board_shape)
         results[game_result] += 1
-        print(f"player {game.players[game_result].__class__.__name__} with index {game_result} won the game")
-        print(f"he has winning percentage of {results[game_result] * 100 / (i + 1)}%")
+        print(f"player {game.players[game_result].__name__()} with index {game_result} won the game. winning percentage: {results[game_result] * 100 / (i + 1)}%")
         print(f"game {i + 1}: time taken: {time.time() - start_time} seconds")
-    print_results(results, num_of_games)
+    print_results(results, num_of_games, game)
     for player in game.players:
         step_time_average = player.get_step_average_time()
         if step_time_average is not None:
             print(f"player {player.index} average step time: {step_time_average}")
-
 
 
 def save_rl_agent(args, players):
@@ -88,8 +85,6 @@ def main(args):
 
 
 if __name__ == '__main__':
-    # random.seed(0)
-    # np.random.seed(0)
     args = parse_args()
     validate_input(args)
     WinningPatterns.build_shapes(args.winning_streak, args.board_shape)
