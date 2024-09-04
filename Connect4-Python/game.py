@@ -22,7 +22,7 @@ class Game:
         self.board = BoardFactory.get_board(board_configuration, board_shape, len(self.players))
         self.ui = UIFactory.getUI(display_ui, self.board)
         self.ui.display_board(self.board)
-        if self.players[0].is_rl and self.players[0].is_currently_learning():
+        if self.players[0].is_rl() and self.players[0].is_currently_learning():
             result = self._rl_game_loop()
         else:
             result = self._game_loop()
