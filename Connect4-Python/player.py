@@ -1,3 +1,4 @@
+import argparse
 import random
 import time
 import torch
@@ -29,6 +30,8 @@ class Player:
     def get_next_player(cur_player, num_of_players):
         return (cur_player + 1) % num_of_players
 
+    def is_rl(self):
+        return False
 
 class RandomPlayer(Player):
     def get_action(self, board, num_of_players, winning_streak, ui=None):
@@ -59,7 +62,7 @@ class MultiAgentSearchAgent(Player):
     is another abstract class.
     """
 
-    def __init__(self, index, evaluation_function=None, depth=2, eval_func_return_depth=2, gamma=0):
+    def __init__(self, index, evaluation_function=None, depth=2, eval_func_return_depth=2, gamma=0.0):
         super(MultiAgentSearchAgent, self).__init__(index)
         self.evaluation_function = evaluation_function
         self.depth = depth
@@ -220,14 +223,8 @@ class BaselinePlayer(MultiAgentSearchAgent):
 
 
 class QLearningPlayer(Player):
-    class ActionCreator:
-        def __init__(self, board_shape):
-            self.board_shape = board_shape
 
-        def __call__(self):
-            return np.zeros((self.board_shape[1], self.board_shape[2]))
-
-    def __init__(self, index, board_shape, num_of_players, currently_learning=False, q_table=None, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=1):
+    def __init__(self, index, board_shape, num_of_players, with_master=True, currently_learning=False, q_table=None, learning_rate=0.1, discount_factor=0.8, exploration_rate=1, exploration_decay=0.9999539):
         super().__init__(index)
         self.currently_learning = currently_learning
         self.step_times = []
@@ -235,26 +232,36 @@ class QLearningPlayer(Player):
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
         self.exploration_decay = exploration_decay
-        self.turns_until_endgame = 0
-        self.opponents = []
-        self.create_opponents(num_of_players)
+        self.board_shape = board_shape
+        self.num_of_players = num_of_players
+        if with_master:
+            evaluation_function = PlayerFactory.get_evaluation_function("all_complex")
+            self.master = AlphaBetaAgent(index, evaluation_function, 1, 2, 0)
+        else:
+            self.master = RandomPlayer(index)
+        # self.opponents = []
+        # self.create_opponents(num_of_players)
         if q_table is None:
-            action_creator = QLearningPlayer.ActionCreator(board_shape)
-            self.q_table = defaultdict(action_creator)
+            self.q_table = {}
         else:
             self.q_table = q_table
 
-    def create_opponents(self, num_of_players):
-        cur_opponent = self.get_next_player(self.index, num_of_players)
-        while cur_opponent != self.index:
-            self.opponents.append(BaselinePlayer(cur_opponent, offensive_evaluation_function))
-            cur_opponent = self.get_next_player(cur_opponent, num_of_players)
+    def is_currently_learning(self):
+        return self.currently_learning
 
-    def set_is_learning(self, is_currently_learning):
-        self.currently_learning = is_currently_learning
+    # def create_opponents(self, num_of_players):
+    #     cur_opponent = self.get_next_player(self.index, num_of_players)
+    #     while cur_opponent != self.index:
+    #         self.opponents.append(BaselinePlayer(cur_opponent, offensive_evaluation_function))
+    #         cur_opponent = self.get_next_player(cur_opponent, num_of_players)
 
-    def set_exploration_decay(self, exploration_decay):
-        self.exploration_decay = exploration_decay
+    def get_q_values(self, state):
+        if state not in self.q_table:
+            self.q_table[state] = np.zeros((self.board_shape[1], self.board_shape[2]))
+        return self.q_table[state]
+
+    def get_q_value(self, state, action):
+        return self.get_q_values(state)[action]
 
     def get_action(self, board: Board, num_of_players, winning_streak, ui=None):
         start_time = time.time()
@@ -263,32 +270,33 @@ class QLearningPlayer(Player):
         legal_actions_indices = [action[0] for action in legal_actions], [action[1] for action in legal_actions]
         if self.currently_learning:
             if np.random.rand() < self.exploration_rate:
-                action = random.choice(legal_actions)
+                action = self.master.get_action(board, num_of_players, winning_streak)
             else:
-                if state in self.q_table:
-                    q_values = self.q_table[state]
-                else:
-                    self.q_table[state] = np.zeros((board.board.shape[1], board.board.shape[2]))
-                    q_values = self.q_table[state]
+                q_values = self.get_q_values(state)
                 q_values_for_legal_actions = q_values[legal_actions_indices]
                 action = legal_actions[np.argmax(q_values_for_legal_actions)]
 
-            next_board = board.generate_successor(self.index, action, winning_streak)
-            reward = self.calculate_reward(next_board, num_of_players, winning_streak)
-            self.learn(board, action, reward, next_board)
+            # rl_board = board.generate_successor(self.index, action, winning_streak)
+            # opponents_board = self.get_opponents_board(rl_board, self.index, num_of_players, winning_streak)
+            # reward = self.calculate_reward(rl_board, opponents_board, num_of_players, winning_streak)
+            # self.learn(board, action, reward, opponents_board)
         else:
-            if state in self.q_table:
-                q_values = self.q_table[state]
-            else:
-                number_of_steps = np.ceil(np.sum(board.board != -1) / num_of_players)
-                # print("State not found in q_table, number of steps taken", number_of_steps)
-                self.q_table[state] = np.zeros((board.board.shape[1], board.board.shape[2]))
-                q_values = self.q_table[state]
+            q_values = self.get_q_values(state)
             q_values_for_legal_actions = q_values[legal_actions_indices]
             action = legal_actions[np.argmax(q_values_for_legal_actions)]
         time_taken = time.time() - start_time
         self.step_times.append(time_taken)
         return action
+
+    # def get_opponents_board(self, board, player_index, num_of_players, winning_streak):
+    #     next_player_index = self.get_next_player(player_index, num_of_players)
+    #     opponents_board = board.__copy__()
+    #     while next_player_index != player_index and not opponents_board.is_board_full() and not opponents_board.have_we_won(winning_streak):
+    #         cur_player = self.opponents[next_player_index]
+    #         action = cur_player.get_action(opponents_board, num_of_players, winning_streak)
+    #         opponents_board = opponents_board.generate_successor(next_player_index, action, winning_streak)
+    #         next_player_index = self.get_next_player(next_player_index, num_of_players)
+    #     return opponents_board
 
     # def monte_carlo_simulation(self, board, num_of_players, winning_streak, steps=None):
     #     next_board = board.__copy__()
@@ -307,39 +315,31 @@ class QLearningPlayer(Player):
     #
     #     return Game.TIE
 
-    def calculate_reward(self, board, num_of_players, winning_streak):
-        if board.have_we_won(winning_streak):
+    def update_q_table(self, board_before_rl, rl_action, board_after_rl, board_after_opponents, winning_streak):
+        reward = self.calculate_reward(board_after_rl, board_after_opponents, winning_streak)
+        self.learn(board_before_rl, rl_action, reward, board_after_opponents)
+
+
+    def calculate_reward(self, board_after_rl, board_after_opponents, winning_streak):
+        if board_after_rl.have_we_won(winning_streak):
             return 500
-        if board.is_board_full():
+        if board_after_opponents.have_we_won(winning_streak):
+            number_of_steps = np.ceil(np.sum(board_after_opponents.board != -1) / self.num_of_players)
+            return -500 + number_of_steps
+        if board_after_rl.is_board_full() or board_after_opponents.is_board_full():
             return 200
-        if self.can_opponent_win(board, num_of_players, winning_streak):
-            return -500 + self.turns_until_endgame
-        self.turns_until_endgame += 2
         return -1
 
-    def can_opponent_win(self, board, num_of_players, winning_streak):
-        cur_player_index = self.get_next_player(self.index, num_of_players)
-        while cur_player_index != self.index:
-            cur_player = self.opponents[cur_player_index - 1]
-            action = cur_player.get_action(board, num_of_players, winning_streak)
-            next_board = board.generate_successor(cur_player_index, action, winning_streak)
-            if next_board.have_we_won(winning_streak):
-                return True
-            cur_player_index = self.get_next_player(cur_player_index, num_of_players)
-        return False
-
-        # reward = 0
-        # for i in range(num_of_simulations):
-        #     result = self.monte_carlo_simulation(board, num_of_players, winning_streak)
-        #     if result == self.index:
-        #         reward += 1000000
-        #     elif result == Game.TIE:
-        #         pass
-        #     else:
-        #         reward -= 1000000
-        #
-        # return reward / num_of_simulations
-
+    # def can_opponent_win(self, board, num_of_players, winning_streak):
+    #     cur_player_index = self.get_next_player(self.index, num_of_players)
+    #     while cur_player_index != self.index:
+    #         cur_player = self.opponents[cur_player_index - 1]
+    #         action = cur_player.get_action(board, num_of_players, winning_streak)
+    #         next_board = board.generate_successor(cur_player_index, action, winning_streak)
+    #         if next_board.have_we_won(winning_streak):
+    #             return True
+    #         cur_player_index = self.get_next_player(cur_player_index, num_of_players)
+    #     return False
 
 
     def learn(self, board, action, reward, next_board):
@@ -348,11 +348,13 @@ class QLearningPlayer(Player):
         next_state = self.get_state_representation(next_board)
 
         # Get max Q-value for the next state
-        next_max_q_value = np.max(self.q_table[next_state])
+        next_q_values = self.get_q_values(next_state)
+        next_max_q_value = np.max(next_q_values)
 
         # Q-learning update rule
-        self.q_table[state][action] = (1 - self.learning_rate) * self.q_table[state][action] + \
-                                      self.learning_rate * (reward + self.discount_factor * next_max_q_value)
+        cur_q_value = self.get_q_value(state, action)
+        self.q_table[state][action] = ((1 - self.learning_rate) * cur_q_value +
+                                       self.learning_rate * (reward + self.discount_factor * next_max_q_value))
 
         # Decay exploration rate
         self.exploration_rate *= self.exploration_decay
@@ -363,8 +365,8 @@ class QLearningPlayer(Player):
         """
         return tuple(board.board.flatten())
 
-    def stop_learning(self):
-        self.currently_learning = False
+    def is_rl(self):
+        return True
 
     def get_step_average_time(self):
         return np.mean(self.step_times)
@@ -435,6 +437,11 @@ class PlayerFactory:
 
     @staticmethod
     def create_rl_agent(args, index):
+        # opponents = [None] * len(args.players)
+        # for i in range(len(args.players)):
+        #     if i != index:
+        #         opponents[i] = PlayerFactory.get_player(args.players[i], i, args)
+
         if args.load_rl_agent:
             full_path_filename = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, index,
                                                               args.depths[1 - index])

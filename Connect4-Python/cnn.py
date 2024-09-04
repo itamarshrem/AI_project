@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 EMPTY_CELL = -1
 
 LR = 0.01
-BATCH_SIZE = 10
-EPOCHS = 1
+BATCH_SIZE = 100
+EPOCHS = 5
 
 device = ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -58,6 +58,8 @@ def create_data_set(path_to_q_table, num_of_players, board_shape, player_index):
         for col, value in enumerate(action_values):
             if value == 0:
                 continue
+            if abs(value) > 500:  # we want to truncate huge values so the cnn model won't try to adapt to outliers
+                value = np.sign(value) * 500
             board = place_disc(board, col, player_index)
             board_key = tuple(board.flatten())
             if board_key not in board_grades:
@@ -154,7 +156,7 @@ def main():
     # args = parse_args()
 
     train_from_zero = True
-    should_create_dataset = False
+    should_create_dataset = True
 
     print("Running on:", device)
     full_path_filename = utils.get_rl_agent_save_path(4, [6, 7, 1], 0, 2)

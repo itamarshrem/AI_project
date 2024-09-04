@@ -22,7 +22,10 @@ class Game:
         self.board = BoardFactory.get_board(board_configuration, board_shape, len(self.players))
         self.ui = UIFactory.getUI(display_ui, self.board)
         self.ui.display_board(self.board)
-        result = self._game_loop()
+        if self.players[0].is_rl and self.players[0].is_currently_learning():
+            result = self._rl_game_loop()
+        else:
+            result = self._game_loop()
         self.display_result_in_ui(result)
         return result
 
@@ -47,4 +50,27 @@ class Game:
             player_index = (player_index + 1) % len(self.players)
         return self.TIE
 
+    def _rl_game_loop(self):
+        rl_index = 0
+        rl_player = self.players[rl_index]
+        winning_player = self.TIE
+        while winning_player == self.TIE and not self.board.is_board_full():
+            board_before_rl = self.board.__copy__()
+            winning_player, rl_action = self.play_turn(rl_index)
+            board_after_rl = self.board.__copy__()
+            cur_player_index = 1
+            while cur_player_index < len(self.players) and (not self.board.is_board_full() and winning_player == self.TIE):
+                winning_player, _ = self.play_turn(cur_player_index)
+                cur_player_index += 1
+            rl_player.update_q_table(board_before_rl, rl_action, board_after_rl, self.board, self.winning_streak)
+        return winning_player
+
+    def play_turn(self, player_index):
+        player = self.players[player_index]
+        action = player.get_action(self.board, len(self.players), self.winning_streak, self.ui)
+        self.board.apply_action(action, player.index, self.winning_streak)
+        self.ui.display_board(self.board)
+        if self.board.have_we_won(self.winning_streak):
+            return player_index, action
+        return self.TIE, action
 

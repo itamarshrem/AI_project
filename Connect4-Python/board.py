@@ -4,16 +4,18 @@ from scipy.signal import convolve
 
 class Board:
     EMPTY_CELL = -1
-    def __init__(self, rows, cols, depth=1, num_of_players=2, board=None, conv_res_dict=None):
+    def __init__(self, rows, cols, depth=1, num_of_players=2, board=None, conv_res_dict=None, last_disc_location=None):
         if board is None:
             self._board = np.ones((rows, cols, depth)) * self.EMPTY_CELL
             self.rows = rows
             self.cols = cols
             self.depth = depth
+            self.last_disc_location = None
         else:
+            assert last_disc_location is not None or np.all(board == self.EMPTY_CELL)
             self._board = board
             self.rows, self.cols, self.depth = board.shape
-        self.last_disc_location = None
+            self.last_disc_location = last_disc_location
         self.num_of_players = num_of_players
         self.conv_res_by_direction = {}
         if conv_res_dict is None:
@@ -27,7 +29,7 @@ class Board:
             self.conv_res_by_direction[direction] = np.zeros((self.num_of_players, rows, cols, depth))
 
     def __copy__(self):
-        b = Board(self.rows, self.cols, self.depth, self.num_of_players, self._board.copy(), {})
+        b = Board(self.rows, self.cols, self.depth, self.num_of_players, self._board.copy(), {}, self.last_disc_location)
         # b.conv_res_by_direction = self.conv_res_by_direction
         # deep copy the conv_res_by_direction
         b.conv_res_by_direction = {k: v.copy() for k, v in self.conv_res_by_direction.items()}
@@ -43,7 +45,6 @@ class Board:
         legal_actions = np.argwhere(self.board[self.rows - 1, :, :] == self.EMPTY_CELL)
         np.random.shuffle(legal_actions)
         return legal_actions.tolist()
-        # return np.argwhere(self.board[self.rows - 1, :, :] == self.EMPTY_CELL).tolist()
 
     def is_board_full(self):
         return np.all(self.board != self.EMPTY_CELL)

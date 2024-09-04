@@ -25,8 +25,7 @@ def parse_args():
     parser.add_argument('--rl_currently_learning', action='store_true', help= 'if set, the rlagent is learning')
     parser.add_argument('-ng', '--num_of_games', type=int, default=1, help='Number of consecutive games')
     parser.add_argument('-ui', '--display_screen', action='store_true', help='if set, ui is displayed')
-    parser.add_argument('-bc', '--board_configuration', type=str, default="None", choices=["None", "edge_case1"],
-                        help='start a game with a specific board')
+    parser.add_argument('-bc', '--board_configuration', type=str, default="None", choices=["None", "edge_case1"], help='start a game with a specific board')
 
     return parser.parse_args()
 
@@ -57,8 +56,8 @@ def print_results(results, num_of_games):
 
 def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape):
     results = defaultdict(lambda: 0)
+    max_moves = int(board_shape[0] * board_shape[1] * board_shape[2] / len(game.players))
     for i in range(num_of_games):
-        # save time
         start_time = time.time()
         game_result = game.run(display_screen, board_configuration, board_shape)
         results[game_result] += 1
