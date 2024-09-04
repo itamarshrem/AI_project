@@ -66,6 +66,7 @@ class Game:
             board_before_rl = self.board.__copy__()
             winning_player, rl_action = self.play_turn(rl_index)
             board_after_rl = self.board.__copy__()
+            cur_player_index = Player.get_next_player(cur_player_index, num_of_players)
             while cur_player_index != rl_index and (not self.board.is_board_full() and winning_player == self.TIE):
                 winning_player, _ = self.play_turn(cur_player_index)
                 cur_player_index = Player.get_next_player(cur_player_index, num_of_players)
