@@ -1,9 +1,6 @@
 import time
-import numpy as np
-# from scipy.signal import convolve
 from initial_boards import BoardFactory
 from user_interface import UIFactory
-# from winning_patterns import WinningPatterns
 
 
 class Game:

@@ -1,5 +1,3 @@
-import argparse
-import random
 import time
 import torch
 import utils
@@ -152,7 +150,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        action, value = self.__alphabeta_helper(board, self.index, self.depth, self.MIN_SCORE, self.MAX_SCORE, num_of_players, winning_streak)
+        action, value = self.__alphabeta_helper(board, self.index, self.depth + 1, self.MIN_SCORE, self.MAX_SCORE, num_of_players, winning_streak)
         return action
 
     def __alphabeta_helper(self, cur_state, next_player, cur_depth, a, b, num_of_players, winning_streak):
@@ -164,6 +162,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return self.__min_helper(cur_state, next_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak)
 
     def __max_helper(self, cur_state, cur_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak):
+        if cur_depth == 0 or not legal_actions:
+            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
         max_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action, winning_streak=winning_streak)
@@ -182,7 +182,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             _, new_b = self.__alphabeta_helper(successor, self.get_next_player(cur_player, num_of_players), cur_depth, a, b, num_of_players, winning_streak)
             if new_b < b or min_action is None:
                 b = new_b
-                min_action = b
+                min_action = action
             if b <= a:
                 break
         return min_action, b
