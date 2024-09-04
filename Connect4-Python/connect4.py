@@ -56,13 +56,12 @@ def print_results(results, num_of_games):
 
 def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape):
     results = defaultdict(lambda: 0)
-    max_moves = int(board_shape[0] * board_shape[1] * board_shape[2] / len(game.players))
     for i in range(num_of_games):
         start_time = time.time()
         game_result = game.run(display_screen, board_configuration, board_shape)
         results[game_result] += 1
-        print(
-            f"game {i + 1}: player {game_result} won!! he has winning percentage of {results[game_result] * 100 / (i + 1)}%")
+        print(f"player {game.players[game_result].__class__.__name__} with index {game_result} won the game")
+        print(f"he has winning percentage of {results[game_result] * 100 / (i + 1)}%")
         print(f"game {i + 1}: time taken: {time.time() - start_time} seconds")
     print_results(results, num_of_games)
     for player in game.players:

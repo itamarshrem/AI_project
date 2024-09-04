@@ -207,19 +207,20 @@ class BaselinePlayer(MultiAgentSearchAgent):
             value = self.evaluation_function(successor, self.index, num_of_players, winning_streak)
             actions_values.append(value)
 
-        # actions_values = np.array(actions_values)
+        actions_values = np.array(actions_values)
         # apply softmax on the values and choose a random action based on the probabilities
-        # probabilities = np.exp(actions_values) / np.sum(np.exp(actions_values))
-        # action = legal_actions[np.random.choice(len(legal_actions), p=probabilities)]
+        probabilities = actions_values / np.sum(actions_values)
+        action = legal_actions[np.random.choice(len(legal_actions), p=probabilities)]
+        return action
 
         # choose the action with the highest value
-        max_value = actions_values[0]
-        max_action = legal_actions[0]
-        for i in range(1, len(actions_values)):
-            if actions_values[i] > max_value:
-                max_value = actions_values[i]
-                max_action = legal_actions[i]
-        return max_action
+        # max_value = actions_values[0]
+        # max_action = legal_actions[0]
+        # for i in range(1, len(actions_values)):
+        #     if actions_values[i] > max_value:
+        #         max_value = actions_values[i]
+        #         max_action = legal_actions[i]
+        # return max_action
 
 
 class QLearningPlayer(Player):
@@ -239,8 +240,6 @@ class QLearningPlayer(Player):
             self.master = AlphaBetaAgent(index, evaluation_function, 1, 2, 0)
         else:
             self.master = RandomPlayer(index)
-        # self.opponents = []
-        # self.create_opponents(num_of_players)
         if q_table is None:
             self.q_table = {}
         else:
@@ -249,11 +248,6 @@ class QLearningPlayer(Player):
     def is_currently_learning(self):
         return self.currently_learning
 
-    # def create_opponents(self, num_of_players):
-    #     cur_opponent = self.get_next_player(self.index, num_of_players)
-    #     while cur_opponent != self.index:
-    #         self.opponents.append(BaselinePlayer(cur_opponent, offensive_evaluation_function))
-    #         cur_opponent = self.get_next_player(cur_opponent, num_of_players)
 
     def get_q_values(self, state):
         if state not in self.q_table:
@@ -276,10 +270,6 @@ class QLearningPlayer(Player):
                 q_values_for_legal_actions = q_values[legal_actions_indices]
                 action = legal_actions[np.argmax(q_values_for_legal_actions)]
 
-            # rl_board = board.generate_successor(self.index, action, winning_streak)
-            # opponents_board = self.get_opponents_board(rl_board, self.index, num_of_players, winning_streak)
-            # reward = self.calculate_reward(rl_board, opponents_board, num_of_players, winning_streak)
-            # self.learn(board, action, reward, opponents_board)
         else:
             q_values = self.get_q_values(state)
             q_values_for_legal_actions = q_values[legal_actions_indices]
@@ -288,32 +278,6 @@ class QLearningPlayer(Player):
         self.step_times.append(time_taken)
         return action
 
-    # def get_opponents_board(self, board, player_index, num_of_players, winning_streak):
-    #     next_player_index = self.get_next_player(player_index, num_of_players)
-    #     opponents_board = board.__copy__()
-    #     while next_player_index != player_index and not opponents_board.is_board_full() and not opponents_board.have_we_won(winning_streak):
-    #         cur_player = self.opponents[next_player_index]
-    #         action = cur_player.get_action(opponents_board, num_of_players, winning_streak)
-    #         opponents_board = opponents_board.generate_successor(next_player_index, action, winning_streak)
-    #         next_player_index = self.get_next_player(next_player_index, num_of_players)
-    #     return opponents_board
-
-    # def monte_carlo_simulation(self, board, num_of_players, winning_streak, steps=None):
-    #     next_board = board.__copy__()
-    #     cur_player = self.get_next_player(self.index, num_of_players)
-    #     i = 0
-    #     while steps is None or i < steps:
-    #         if next_board.have_we_won(winning_streak):
-    #             return cur_player
-    #         elif next_board.is_board_full():
-    #             return Game.TIE
-    #         legal_actions = next_board.get_legal_actions(winning_streak)
-    #         action = random.choice(legal_actions)
-    #         next_board = next_board.generate_successor(cur_player, location=action, winning_streak=winning_streak)
-    #         cur_player = self.get_next_player(cur_player, num_of_players)
-    #         i += 1
-    #
-    #     return Game.TIE
 
     def update_q_table(self, board_before_rl, rl_action, board_after_rl, board_after_opponents, winning_streak):
         reward = self.calculate_reward(board_after_rl, board_after_opponents, winning_streak)
@@ -330,33 +294,20 @@ class QLearningPlayer(Player):
             return 200
         return -1
 
-    # def can_opponent_win(self, board, num_of_players, winning_streak):
-    #     cur_player_index = self.get_next_player(self.index, num_of_players)
-    #     while cur_player_index != self.index:
-    #         cur_player = self.opponents[cur_player_index - 1]
-    #         action = cur_player.get_action(board, num_of_players, winning_streak)
-    #         next_board = board.generate_successor(cur_player_index, action, winning_streak)
-    #         if next_board.have_we_won(winning_streak):
-    #             return True
-    #         cur_player_index = self.get_next_player(cur_player_index, num_of_players)
-    #     return False
-
 
     def learn(self, board, action, reward, next_board):
         action = tuple(action)
         state = self.get_state_representation(board)
         next_state = self.get_state_representation(next_board)
 
-        # Get max Q-value for the next state
         next_q_values = self.get_q_values(next_state)
         next_max_q_value = np.max(next_q_values)
 
-        # Q-learning update rule
         cur_q_value = self.get_q_value(state, action)
-        self.q_table[state][action] = ((1 - self.learning_rate) * cur_q_value +
-                                       self.learning_rate * (reward + self.discount_factor * next_max_q_value))
+        self.q_table[state][action] = (
+                (1 - self.learning_rate) * cur_q_value + self.learning_rate * (reward + self.discount_factor * next_max_q_value)
+        )
 
-        # Decay exploration rate
         self.exploration_rate *= self.exploration_decay
 
     def get_state_representation(self, board):
@@ -389,8 +340,6 @@ class CnnAgent(Player):
         return action
 
     def _get_board_value(self, board):
-        # get the value of the board
-
         return self.model.predict(board)
 
     def _get_best_action(self, board):

@@ -113,14 +113,24 @@ def defensive_evaluation_function(board, player_index, num_of_players, winning_s
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
-    return -max_opponents_streaks, -max_opponents_streaks_app
+    return -combine_scores(max_opponents_streaks, max_opponents_streaks_app)
 
 
 def offensive_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
-    return cur_player_max_streak, cur_player_max_streak_app
+    return combine_scores(cur_player_max_streak, cur_player_max_streak_app)
+
+
+def combine_scores(max_streaks, max_streaks_appearance):
+    shift = 1
+    actual_max_streak = np.log2(max_streaks)
+    shifted_max_streak = 2 ** (actual_max_streak + shift)
+    bind_max_streaks_appearance = min(max_streaks_appearance, shifted_max_streak - 1)
+    final_score = shifted_max_streak + bind_max_streaks_appearance
+    return final_score
+
 
 
 
