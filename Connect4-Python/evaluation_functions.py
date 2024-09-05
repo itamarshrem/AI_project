@@ -103,7 +103,7 @@ def simple_evaluation_function(board, player_index, num_of_players, winning_stre
 
     return cur_player_max_streak - max_opponents_streaks
 
-def ibef_evaluation_function(board, player_index, num_of_players, winning_streak):
+def ibef2_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
