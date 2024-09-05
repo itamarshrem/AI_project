@@ -326,11 +326,11 @@ class QLearningPlayer(Player):
 
         self.exploration_rate *= self.exploration_decay
 
-    def old_get_state_representation(self, board):
-        """
-        This method returns a tuple that uniquely represents the state of the 3d board.
-        """
-        return tuple(board.board.flatten())
+    # def old_get_state_representation(self, board):
+    #     """
+    #     This method returns a tuple that uniquely represents the state of the 3d board.
+    #     """
+    #     return tuple(board.board.flatten())
 
     def get_state_representation(self, board):
         """
