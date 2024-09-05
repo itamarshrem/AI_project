@@ -21,19 +21,26 @@ results:
 title: alpha_beta g=0.6 vs defensive:
 configuration: -size 6 7 5 -p baseline alpha_beta -ef defensive all_complex -d 1 4 -g 0 0.6 -ws 4 -ng 100
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 96 games. winning percentage: 96.0%
+player BaselinePlayer_defensive_evaluation_function (index 0) won 4 games. winning percentage: 4.0%
 
 ############################################################################################################
 title: alpha_beta g=0.4 vs defensive:
 configuration: -size 6 7 5 -p baseline alpha_beta -ef defensive all_complex -d 1 4 -g 0 0.4 -ws 4 -ng 100
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 99 games. winning percentage: 99.0%
+player BaselinePlayer_defensive_evaluation_function (index 0) won 1 games. winning percentage: 1.0%
 
 ############################################################################################################
 title: alpha_beta g=0.2 vs defensive:
 configuration: -size 6 7 5 -p baseline alpha_beta -ef defensive all_complex -d 1 4 -g 0 0.2 -ws 4 -ng 100
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 100 games. winning percentage: 100.0%
 
 ############################################################################################################
 title: alpha_beta g=0 vs defensive:
 configuration: -size 6 7 5 -p baseline alpha_beta -ef defensive all_complex -d 1 4 -g 0 0 -ws 4 -ng 100
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 100 games. winning percentage: 100.0%
+
 
