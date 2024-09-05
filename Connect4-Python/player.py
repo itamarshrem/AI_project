@@ -253,7 +253,7 @@ class QLearningPlayer(Player):
         self.num_of_players = num_of_players
         if with_master:
             evaluation_function = PlayerFactory.get_evaluation_function("all_complex")
-            self.master = AlphaBetaAgent(index, evaluation_function, 1, 2, 0)
+            self.master = AlphaBetaAgent(index, evaluation_function, 2, 2, 0)
         else:
             self.master = RandomPlayer(index)
         if q_table is None:
@@ -326,11 +326,24 @@ class QLearningPlayer(Player):
 
         self.exploration_rate *= self.exploration_decay
 
-    def get_state_representation(self, board):
+    def old_get_state_representation(self, board):
         """
         This method returns a tuple that uniquely represents the state of the 3d board.
         """
         return tuple(board.board.flatten())
+
+    def get_state_representation(self, board):
+        """
+        This method returns a tuple that uniquely represents the state of the 3d board.
+        """
+        sum_per_column = np.sum(board.board != Board.EMPTY_CELL, axis=0)
+        not_blocked_streaks = []
+        for conv_res in board.conv_res_by_direction.values():
+            mask = (conv_res.sum(axis=0) == conv_res)
+            not_blocked_streaks.append((conv_res * mask).flatten())
+        state = tuple(sum_per_column.flatten()) + tuple(np.concatenate(not_blocked_streaks))
+        return state
+
 
     def get_step_average_time(self):
         return np.mean(self.step_times)
