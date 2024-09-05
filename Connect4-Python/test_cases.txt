@@ -1,20 +1,39 @@
-in each test, check win rate and running time
 
-1. run with different board sizes,
-2. run with different number of agents
-3. run 2 minimax agents, each with different searching depth tree
-4. check minmax with the simpler heuristic
-5. compare run times with previous noobs work.
-6. run connect 4 3d(?)
-
-
-- run shalom's run with more games (maybe try the cnn then) - aboud
-- maybe train rl with master with depth 2 - aboud
-- modify baseline players to be probabilistic - shalom
+------------------------------------------------------------------------------------------------
 - generalize rl to work on 3d board - seems ok, should verify!!!!
 - generalize rl to work with different indices
 - generalize rl to work with multiple player
-- work on the report, add results section
+- work on the report, add results section - itamar
+- check how we can improve the argparse shit - itamar
 - ui to 3d
+- consider the CNN - shalom
 
+________________________________________________________________________________________________
+
+minmax and alpha beta comparisons and results:
+there is no reason to compare him against random, so we tested him against probabalistic enemies, and the gamma option
+2 players 2D- our heuristic vs IBEF2 heuristic
+2 players 2D- our heuristic vs the baseline players(offensive, defensive) - they are already probabalistic, with softmax
+2 players 2D - vs alpha_beta all_complex with different gammas
+
+3 players alpha_beta vs 2 offensive - we expect it to be worse than 2
+3 players alpha_beta vs defensive - we expect it to be better than 2 offensive
+maybe create a graph of increasing number of opponents
+
+comparisons on 3d board vs an enemy we'll choose later
+
+________________________________________________________________________________________________
+
+rl agent comparisons and results:
+graph1
+rl_agent that was trained with master with different depths - vs offensive
+rl_agent that was trained with master with different depths - vs defensive
+rl_agent that was trained with master with different depths - vs the opponent during training
+graph2
+rl_agent that was trained with master alpha_beta with depth 3 with different gamas - vs offensive
+rl_agent that was trained with master alpha_beta with depth 3 with different gamas - vs defensive
+rl_agent that was trained with master alpha_beta with depth 3 with different gamas - vs the opponent during training
+graph3
+
+compare 2 rl_agents against each other - the first rl will be trained to be defensive, and the second one offensive
 
