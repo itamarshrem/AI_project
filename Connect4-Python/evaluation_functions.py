@@ -104,10 +104,15 @@ def simple_evaluation_function(board, player_index, num_of_players, winning_stre
     return cur_player_max_streak - max_opponents_streaks
 
 def ibef2_evaluation_function(board, player_index, num_of_players, winning_streak):
-    cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
-        complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
+    assert num_of_players == 2
+    cur_streak_sum, opponent_streak_sum = 0, 0
 
-    return (cur_player_max_streak * cur_player_max_streak_app) - (max_opponents_streaks * max_opponents_streaks_app)
+    for direction, conv_res in board.conv_res_by_direction.items():
+        mask = (conv_res.sum(axis=0) == conv_res)
+        not_blocked_streaks = (conv_res * mask)
+        cur_streak_sum += np.sum(2 ** not_blocked_streaks[player_index])
+        opponent_streak_sum += np.sum(2 ** not_blocked_streaks[1 - player_index])
+    return cur_streak_sum - opponent_streak_sum
 
 def defensive_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \

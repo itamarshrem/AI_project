@@ -388,7 +388,7 @@ class PlayerFactory:
     @staticmethod
     def get_player(player_type, index, args):
         evaluation_function = PlayerFactory.get_evaluation_function(args.eval_functions[index])
-        eval_func_return_depth = 1 if args.eval_functions[index] in {'simple', 'ibef'} else 2
+        eval_func_return_depth = 1 if args.eval_functions[index] in {'simple', 'ibef2'} else 2
         if player_type == "random":
             return RandomPlayer(index)
         elif player_type == "human":
