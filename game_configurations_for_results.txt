@@ -1,0 +1,31 @@
+title: alpha_beta g=0.6 vs offensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex offensive -d 4 1 -g 0.6 0 -ws 4 -ng 10
+results: alpha_beta won 73% of the games, opponent won 23% of the games
+############################################################################################################
+title: alpha_beta g=0.4 vs offensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex offensive -d 4 1 -g 0.4 0 -ws 4 -ng 10
+results:
+############################################################################################################
+title: alpha_beta g=0.2 vs offensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex offensive -d 4 1 -g 0.2 0 -ws 4 -ng 10
+results:
+############################################################################################################
+title: alpha_beta g=0 vs offensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex offensive -d 4 1 -g 0 0 -ws 4 -ng 10
+results:
+############################################################################################################
+title: alpha_beta g=0.6 vs defensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex defensive -d 4 1 -g 0.6 0 -ws 4 -ng 10
+results:
+############################################################################################################
+title: alpha_beta g=0.4 vs defensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex defensive -d 4 1 -g 0.4 0 -ws 4 -ng 10
+results:
+############################################################################################################
+title: alpha_beta g=0.2 vs defensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex defensive -d 4 1 -g 0.2 0 -ws 4 -ng 10
+results:
+############################################################################################################
+title: alpha_beta g=0 vs defensive:
+configuration: -size 6 7 5 -p alpha_beta baseline -ef all_complex defensive -d 4 1 -g 0 0 -ws 4 -ng 10
+results:

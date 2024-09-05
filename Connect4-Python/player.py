@@ -435,7 +435,7 @@ class PlayerFactory:
             return defensive_evaluation_function
         elif evaluation_function == "offensive":
             return offensive_evaluation_function
-        elif evaluation_function == "ibef":
-            return ibef_evaluation_function
+        elif evaluation_function == "ibef2":
+            return ibef2_evaluation_function
         else:
             return None
