@@ -1,20 +1,22 @@
 
 ------------------------------------------------------------------------------------------------
+Tasks:
 - generalize rl to work on 3d board - seems ok, should verify!!!!
 - generalize rl to work with different indices
 - generalize rl to work with multiple player
 - work on the report, add results section - itamar
 - check how we can improve the argparse shit - itamar
+- add another previous work from the internet
 - ui to 3d
 - consider the CNN - shalom
 
 ________________________________________________________________________________________________
-
+all tests will be run on board_shape = (6, 7, 5)
 minmax and alpha beta comparisons and results:
 there is no reason to compare him against random, so we tested him against probabalistic enemies, and the gamma option
-2 players 2D- our heuristic vs IBEF2 heuristic
-2 players 2D- our heuristic vs the baseline players(offensive, defensive) - they are already probabalistic, with softmax
-2 players 2D - vs alpha_beta all_complex with different gammas
+2 players 3D- our heuristic vs IBEF2 heuristic
+2 players 3D- our heuristic vs the baseline players(offensive, defensive) - they are already probabalistic, with softmax
+2 players 3D - vs alpha_beta all_complex with different gammas
 
 3 players alpha_beta vs 2 offensive - we expect it to be worse than 2
 3 players alpha_beta vs defensive - we expect it to be better than 2 offensive
@@ -25,11 +27,12 @@ comparisons on 3d board vs an enemy we'll choose later
 ________________________________________________________________________________________________
 
 rl agent comparisons and results:
-graph1
+graph that shows the process of training- we win a lot at first, then there is a decrease and then an increase when it starts using its q_table
+graph1:
 rl_agent that was trained with master with different depths - vs offensive
 rl_agent that was trained with master with different depths - vs defensive
 rl_agent that was trained with master with different depths - vs the opponent during training
-graph2
+graph2:
 rl_agent that was trained with master alpha_beta with depth 3 with different gamas - vs offensive
 rl_agent that was trained with master alpha_beta with depth 3 with different gamas - vs defensive
 rl_agent that was trained with master alpha_beta with depth 3 with different gamas - vs the opponent during training
