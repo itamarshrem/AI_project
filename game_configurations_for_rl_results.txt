@@ -9,7 +9,7 @@ vs complex g=0.2 d=4:
 ############################################################################################################
 ############################################################################################################
 title: rl with master complex gamma 0 vs complex gamma 0.2:
--size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 1 2 -g 0 0.2 -ws 4 -ng 100000 --rl_currently_learning
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.2 --rl_currently_learning
 results:
 vs defensive:
 player BaselinePlayer_defensive_evaluation_function (index 1) won 927 games. winning percentage: 92.7%
@@ -28,7 +28,7 @@ number of ties: 1, tie percentage: 0.1%
 ############################################################################################################
 ############################################################################################################
 title: train rl with master complex gamma 0 vs complex gamma 0.4:
--size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 1 2 -ws 4 -ng 100000 -g 0 0.4 --rl_currently_learning
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.4 --rl_currently_learning
 results:
 vs defensive:
 player BaselinePlayer_defensive_evaluation_function (index 1) won 786 games. winning percentage: 78.6%
@@ -45,7 +45,7 @@ player QLearningPlayer (index 0) won 162 games. winning percentage: 16.2%
 ############################################################################################################
 ############################################################################################################
 title: rl with master complex gamma 0 vs complex gamma 0.6:
--size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 1 2 -g 0 0.6 -ws 4 -ng 100000 --rl_currently_learning
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.6 --rl_currently_learning
 results:
 vs defensive:
 player BaselinePlayer_defensive_evaluation_function (index 1) won 723 games. winning percentage: 72.3%
@@ -64,7 +64,7 @@ player QLearningPlayer (index 0) won 223 games. winning percentage: 22.3%
 ############################################################################################################
 title: rl with master complex gamma 0 vs complex gamma 0.x:
 save results during training for the parabolic graph!!!!!
--size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 2 2 -g 0 0.x -ws 4 -ng 100000 --rl_currently_learning
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.x --rl_currently_learning
 results:
 vs defensive:
 vs offensive:
@@ -74,7 +74,7 @@ vs complex g=0.2 d=4:
 ############################################################################################################
 title: rl with master complex gamma 1 vs complex gamma 0.x:
 must update the rl_agent to use the new gamma!!!!!!!!!!!!!!!!!!!!!!!!!!
--size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 2 2 -g 0 0.x -ws 4 -ng 100000 --rl_currently_learning
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.x --rl_currently_learning
 results:
 vs defensive:
 vs offensive:
