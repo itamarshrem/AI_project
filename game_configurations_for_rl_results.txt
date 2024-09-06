@@ -1,3 +1,13 @@
+vs defensive:
+-size 6 7 1 -p rl_agent baseline -ef none defensive -d 1 1 -g 0 0 -ws 4 -ng 1000 -lrl
+vs offensive:
+-size 6 7 1 -p rl_agent baseline -ef none offensive -d 1 1 -g 0 0 -ws 4 -ng 1000 -lrl
+vs complex g=0.2 d=2:
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 1 2 -g 0 0.2 -ws 4 -ng 1000 -lrl
+vs complex g=0.2 d=4:
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 1 4 -g 0 0.2 -ws 4 -ng 1000 -lrl
+############################################################################################################
+############################################################################################################
 title: rl with master complex gamma 0 vs complex gamma 0.2:
 -size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 1 2 -g 0 0.2 -ws 4 -ng 100000 --rl_currently_learning
 results:
@@ -53,7 +63,7 @@ player QLearningPlayer (index 0) won 223 games. winning percentage: 22.3%
 ############################################################################################################
 ############################################################################################################
 title: rl with master complex gamma 0 vs complex gamma 0.x:
-save results during training for the parabolic graph
+save results during training for the parabolic graph!!!!!
 -size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 2 2 -g 0 0.x -ws 4 -ng 100000 --rl_currently_learning
 results:
 vs defensive:
