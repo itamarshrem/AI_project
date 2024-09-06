@@ -20,6 +20,8 @@ results:
 title: alpha_beta g=0 vs offensive:
 configuration: -size 6 7 5 -p baseline alpha_beta -ef offensive all_complex -d 1 4 -g 0 0 -ws 4 -ng 100
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 100 games. winning percentage: 100.0%
+
 
 ############################################################################################################
 title: alpha_beta g=0.6 vs defensive:
@@ -50,6 +52,8 @@ player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 100 games. w
 
 ############################################################################################################
 ############################################################################################################
+
+
 title: offensive vs complex, depth = 1:
 -size 6 7 1 -p baseline alpha_beta -ef offensive all_complex -d 1 1 -g 0 0 -ws 4 -ng 1000
 results:
@@ -125,41 +129,56 @@ player BaselinePlayer_defensive_evaluation_function (index 0) won 6 games. winni
 title: offensive vs complex, depth = 4:
 -size 6 7 1 -p baseline alpha_beta -ef offensive all_complex -d 1 4 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 999 games. winning percentage: 99.9%
+player BaselinePlayer_offensive_evaluation_function (index 0) won 1 games. winning percentage: 0.1%
 
 ############################################################################################################
 title: defensive vs complex, depth = 4:
 -size 6 7 1 -p baseline alpha_beta -ef defensive all_complex -d 1 4 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 1000 games. winning percentage: 100.0%
 
 ############################################################################################################
 title: offensive vs ibef2, depth = 4:
 -size 6 7 1 -p baseline alpha_beta -ef offensive ibef2 -d 1 4 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_ibef2_evaluation_function (index 1) won 818 games. winning percentage: 81.8%
+player BaselinePlayer_offensive_evaluation_function (index 0) won 182 games. winning percentage: 18.2%
 
 ############################################################################################################
 title: defensive vs ibef2, depth = 4:
 -size 6 7 1 -p baseline alpha_beta -ef defensive ibef2 -d 1 4 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_ibef2_evaluation_function (index 1) won 959 games. winning percentage: 95.9%
+player BaselinePlayer_defensive_evaluation_function (index 0) won 41 games. winning percentage: 4.1%
 
 ############################################################################################################
 title: offensive vs complex, depth = 5:
 -size 6 7 1 -p baseline alpha_beta -ef offensive all_complex -d 1 5 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 999 games. winning percentage: 99.9%
+number of ties: 1, tie percentage: 0.1%
 
 ############################################################################################################
 title: defensive vs complex, depth = 5:
 -size 6 7 1 -p baseline alpha_beta -ef defensive all_complex -d 1 5 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 1000 games. winning percentage: 100.0%
 
 ############################################################################################################
 title: offensive vs ibef2, depth = 5:
 -size 6 7 1 -p baseline alpha_beta -ef offensive ibef2 -d 1 5 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_ibef2_evaluation_function (index 1) won 985 games. winning percentage: 98.5%
+player BaselinePlayer_offensive_evaluation_function (index 0) won 14 games. winning percentage: 1.4%
+number of ties: 1, tie percentage: 0.1%
 
 ############################################################################################################
 title: defensive vs ibef2, depth = 5:
 -size 6 7 1 -p baseline alpha_beta -ef defensive ibef2 -d 1 5 -g 0 0 -ws 4 -ng 1000
 results:
+player AlphaBetaAgent_ibef2_evaluation_function (index 1) won 999 games. winning percentage: 99.9%
+player BaselinePlayer_defensive_evaluation_function (index 0) won 1 games. winning percentage: 0.1%
 
 ############################################################################################################
 title: offensive vs complex, depth = 6:
