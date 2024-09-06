@@ -9,7 +9,7 @@ EMPTY_CELL = -1
 
 LR = 0.01
 BATCH_SIZE = 100
-EPOCHS = 5
+EPOCHS = 20
 
 device = ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -21,10 +21,14 @@ def train_model(dataloader, model, loss_fn, optimizer, loss_arr_train):
     for x, y_true in dataloader:
         x, y_true = x.to(device), y_true.to(device)
         y = model(x)
-        loss = loss_fn(y, y_true)
+        params = torch.cat([x.view(-1) for x in model.parameters()])
+        regularization_loss = torch.norm(params, 1) / len(list(model.parameters()))
+        alpha = 0.01
+        loss = loss_fn(y, y_true) + alpha * regularization_loss
+        print(f"loss: {loss.item()}, regularization_loss: {regularization_loss.item()}")
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        optimizer.zero_grad()
         train_loss += loss.item()
     train_loss /= num_batches
     loss_arr_train.append(train_loss)
@@ -39,7 +43,10 @@ def test_model(dataloader, model, loss_fn, loss_arr_test):
         for x, y_true in dataloader:
             x, y_true = x.to(device), y_true.to(device)
             y = model(x)
-            loss = loss_fn(y, y_true)
+            params = torch.cat([x.view(-1) for x in model.parameters()])
+            regularization_loss = torch.norm(params, 1) / len(list(model.parameters()))
+            alpha = 0.01
+            loss = loss_fn(y, y_true) + alpha * regularization_loss
             test_loss += loss.item()
     test_loss /= num_batches
     loss_arr_test.append(test_loss)
@@ -68,7 +75,7 @@ def create_data_set(path_to_q_table, num_of_players, board_shape, player_index):
     data = torch.zeros(len(board_grades), num_of_players, board_shape[0], board_shape[1])
     labels = torch.zeros(len(board_grades))
     for i, (key_board, grades) in enumerate(board_grades.items()):
-        board = utils.pre_process_board(key_board, board_shape, num_of_players)
+        board = utils.pre_process_board(key_board, board_shape, num_of_players, device)
         value = sum(grades) / len(grades)
         data[i, ...] = board
         labels[i] = value
@@ -82,22 +89,31 @@ def place_disc(board, col, player_index):
     board[row, col] = player_index
     return board
 
+
 class CNN(nn.Module):
     def __init__(self, one_hot_board_shape, winning_streak):
         super(CNN, self).__init__()
         self.num_of_players, self.rows, self.cols = one_hot_board_shape
+        assert self.cols > (winning_streak - 1) and (self.rows > winning_streak - 1)
         self.winning_streak = winning_streak
-        self.conv1 = nn.Conv2d(self.num_of_players, 12, winning_streak, stride=1)  # 6 X 7 -> 3 X 4
-        self.conv2 = nn.Conv2d(12, 12, 3, stride=1)  # 3 X 4 -> 1 X 2
-        self.fc1 = nn.Linear((self.rows - 2 * winning_streak) * (self.cols - 2 * winning_streak) * 12, 50)
-        self.fc2 = nn.Linear(50, 1)
+        num_of_directions = 4
+        self.out_channels = self.num_of_players * self.winning_streak * num_of_directions
+        self.conv1 = nn.Conv2d(self.num_of_players, self.out_channels, winning_streak, stride=1)  # 6 X 7 -> 3 X 4
+        self.conv2 = nn.Conv2d(self.out_channels, self.out_channels, 3, stride=1, padding=1)  # 3 X 4 -> 3 X 4
+        # self.cols - winning_streak + 1
+        self.out_flatten_length = (self.rows - winning_streak + 1) * (self.cols - winning_streak + 1) * self.out_channels
+        self.fc1 = nn.Linear(self.out_flatten_length, self.out_flatten_length)
+        self.fc2 = nn.Linear(self.out_flatten_length, self.cols)
+        # self.fc2 = nn.Linear(self.out_flatten_length, 1)
 
     def forward(self, x):
         x = torch.relu(self.conv1(x))
         x = torch.relu(self.conv2(x))
-        x = x.view(-1, (self.rows - 2 * self.winning_streak) * (self.cols - 2 * self.winning_streak) * 12)
+        x = x.view(-1, self.out_flatten_length)
         x = torch.relu(self.fc1(x))
         x = self.fc2(x)
+        x = torch.softmax(x, dim=1)
+        x = x.view(-1, self.cols, 1)
         return x
 
     def predict(self, x):
@@ -124,6 +140,7 @@ def plot_loss(train_loss_arr, test_loss_arr, loss_str):
     # Show the plot
     plt.show()
 
+
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
@@ -134,6 +151,7 @@ def parse_args():
     parser.add_argument('-ng', '--num_of_games', type=int, default=1, help='Number of consecutive games')
 
     return parser.parse_args()
+
 
 def train_and_test(train, test, cnn_model):
     train_loader = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
@@ -151,6 +169,7 @@ def train_and_test(train, test, cnn_model):
     plot_loss(loss_arr_train, loss_arr_test, "MSE loss")
     print('Done!')
     print('Model saved!')
+
 
 def main():
     # args = parse_args()
