@@ -15,7 +15,8 @@ player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 81 games. wi
 title: alpha_beta g=0.2 vs offensive:
 configuration: -size 6 7 5 -p baseline alpha_beta -ef offensive all_complex -d 1 4 -g 0 0.2 -ws 4 -ng 100
 results:
-
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 96 games. winning percentage: 96.0%
+player BaselinePlayer_offensive_evaluation_function (index 0) won 4 games. winning percentage: 4.0%
 ############################################################################################################
 title: alpha_beta g=0 vs offensive:
 configuration: -size 6 7 5 -p baseline alpha_beta -ef offensive all_complex -d 1 4 -g 0 0 -ws 4 -ng 100
