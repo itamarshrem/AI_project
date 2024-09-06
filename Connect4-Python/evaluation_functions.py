@@ -114,6 +114,7 @@ def ibef2_evaluation_function(board, player_index, num_of_players, winning_strea
         opponent_streak_sum += np.sum(2 ** not_blocked_streaks[1 - player_index])
     return cur_streak_sum - opponent_streak_sum
 
+
 def defensive_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
@@ -129,6 +130,7 @@ def offensive_evaluation_function(board, player_index, num_of_players, winning_s
 
 
 def combine_scores(max_streaks, max_streaks_appearance):
+    assert max_streaks > 0 and max_streaks_appearance > 0
     shift = 1
     actual_max_streak = np.log2(max_streaks)
     shifted_max_streak = 2 ** (actual_max_streak + shift)

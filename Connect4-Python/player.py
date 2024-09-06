@@ -221,6 +221,11 @@ class BaselinePlayer(MultiAgentSearchAgent):
             actions_values.append(value)
 
         actions_values = np.array(actions_values)
+        min_value = np.min(actions_values)
+        if min_value < 0:
+            actions_values -= min_value
+        if np.sum(actions_values) == 0:
+            actions_values = np.ones(len(actions_values))
         # apply softmax on the values and choose a random action based on the probabilities
         probabilities = actions_values / np.sum(actions_values)
         action = legal_actions[np.random.choice(len(legal_actions), p=probabilities)]
