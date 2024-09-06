@@ -1,0 +1,72 @@
+title: rl with master complex gamma 0 vs complex gamma 0.2:
+-size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 1 2 -g 0 0.2 -ws 4 -ng 100000 --rl_currently_learning
+results:
+vs defensive:
+player BaselinePlayer_defensive_evaluation_function (index 1) won 927 games. winning percentage: 92.7%
+number of ties: 38, tie percentage: 3.8%
+player QLearningPlayer (index 0) won 35 games. winning percentage: 3.5%
+vs offensive:
+player BaselinePlayer_offensive_evaluation_function (index 1) won 398 games. winning percentage: 39.8%
+player QLearningPlayer (index 0) won 602 games. winning percentage: 60.2%
+vs complex g=0.2 d=2:
+player QLearningPlayer (index 0) won 819 games. winning percentage: 81.9%
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 181 games. winning percentage: 18.1%
+vs complex g=0.2 d=4:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 964 games. winning percentage: 96.4%
+player QLearningPlayer (index 0) won 35 games. winning percentage: 3.5%
+number of ties: 1, tie percentage: 0.1%
+############################################################################################################
+############################################################################################################
+title: train rl with master complex gamma 0 vs complex gamma 0.4:
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 1 2 -ws 4 -ng 100000 -g 0 0.4 --rl_currently_learning
+results:
+vs defensive:
+player BaselinePlayer_defensive_evaluation_function (index 1) won 786 games. winning percentage: 78.6%
+player QLearningPlayer (index 0) won 174 games. winning percentage: 17.4%
+vs offensive:
+player QLearningPlayer (index 0) won 887 games. winning percentage: 88.7%
+player BaselinePlayer_offensive_evaluation_function (index 1) won 113 games. winning percentage: 11.3%
+vs complex g=0.2 d=2:
+player QLearningPlayer (index 0) won 855 games. winning percentage: 85.5%
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 145 games. winning percentage: 14.5%
+vs complex g=0.2 d=4:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 837 games. winning percentage: 83.7%
+player QLearningPlayer (index 0) won 162 games. winning percentage: 16.2%
+############################################################################################################
+############################################################################################################
+title: rl with master complex gamma 0 vs complex gamma 0.6:
+-size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 1 2 -g 0 0.6 -ws 4 -ng 100000 --rl_currently_learning
+results:
+vs defensive:
+player BaselinePlayer_defensive_evaluation_function (index 1) won 723 games. winning percentage: 72.3%
+number of ties: 29, tie percentage: 2.9%
+player QLearningPlayer (index 0) won 248 games. winning percentage: 24.8%
+vs offensive:
+player QLearningPlayer (index 0) won 942 games. winning percentage: 94.2%
+player BaselinePlayer_offensive_evaluation_function (index 1) won 58 games. winning percentage: 5.8%
+vs complex g=0.2 d=2:
+player QLearningPlayer (index 0) won 862 games. winning percentage: 86.2%
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 138 games. winning percentage: 13.8%
+vs complex g=0.2 d=4:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 777 games. winning percentage: 77.7%
+player QLearningPlayer (index 0) won 223 games. winning percentage: 22.3%
+############################################################################################################
+############################################################################################################
+title: rl with master complex gamma 0 vs complex gamma 0.x:
+save results during training for the parabolic graph
+-size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 2 2 -g 0 0.x -ws 4 -ng 100000 --rl_currently_learning
+results:
+vs defensive:
+vs offensive:
+vs complex g=0.2 d=2:
+vs complex g=0.2 d=4:
+############################################################################################################
+############################################################################################################
+title: rl with master complex gamma 1 vs complex gamma 0.x:
+must update the rl_agent to use the new gamma!!!!!!!!!!!!!!!!!!!!!!!!!!
+-size 6 7 1 -p baseline rl -ef rl_agent all_complex -d 2 2 -g 0 0.x -ws 4 -ng 100000 --rl_currently_learning
+results:
+vs defensive:
+vs offensive:
+vs complex g=0.2 d=2:
+vs complex g=0.2 d=4:
