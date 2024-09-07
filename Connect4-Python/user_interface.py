@@ -11,6 +11,9 @@ class Color:
     BLUE = (0, 0, 255)
     YELLOW = (255, 255, 0)
     MAGENTA = (255, 0, 255)
+    GREEN = (0, 255, 0)
+    ORANGE = (255, 165, 0)
+    PURPLE = (128, 0, 128)
 
 class BaseUI:
     def print_to_screen(self, board):
@@ -18,11 +21,13 @@ class BaseUI:
 
     def display_board(self, board):
         raise NotImplementedError
+    def display_initial_message(self):
+        raise NotImplementedError
 
 class UI:
     SQUARESIZE = 100
     RADIUS = int(SQUARESIZE / 2 - 5)
-    PLAYER_COLORS = [Color.RED, Color.YELLOW, Color.MAGENTA]
+    PLAYER_COLORS = [Color.RED, Color.YELLOW, Color.MAGENTA, Color.GREEN, Color.ORANGE, Color.PURPLE]
 
     def __init__(self, board: Board):
         self.width = board.cols * self.SQUARESIZE
@@ -37,6 +42,8 @@ class UI:
         self.screen.blit(label, (40, 10))
         pygame.display.update()
         pygame.time.wait(3000)
+    def display_initial_message(self):
+        pass
 
     def display_board(self, board):
         print(board)
@@ -83,10 +90,40 @@ class EmptyUI(BaseUI):
         pass
     def display_board(self, board):
         pass
+    def display_initial_message(self):
+        pass
+
+class UI3D(BaseUI):
+    def __init__(self, board: Board):
+        self.rows, self.cols, self.depth = board.rows, board.cols, board.depth
+
+    def display_initial_message(self):
+        print("welcome to 3D connect 4! each board displayed on the screen, represents a depth in the 3D board.\n"
+              "So leftmost board is in depth 0, the next one is in depth 1 and so on.\n"
+              "In order to play, you need to enter the column and depth you want to play, seperated by coma.\n"
+              "for example, in board of shape (6, 7, 5) and winning streak of 4, the next inputs will lead you to win,\n"
+              "in case someone else didn't insert disks in the winning pattern:\n"
+              "0, 0\n"
+              "0, 1\n"
+              "0, 2\n"
+              "0, 3\n"
+              "Good luck!\n")
+    def display_board(self, board):
+        print(board)
+    def get_player_input(self, player_index):
+        input_str = input("Enter column and depth, seperated by coma: ")
+        while len(input_str.replace(" ", "").split(",")) != 2:
+            input_str = input("Enter column and depth, seperated by coma: ")
+        column, depth = input_str.replace(" ", "").split(",")
+        return np.array([int(column), int(depth)])
+    def print_to_screen(self, result):
+        print(result)
 
 class UIFactory:
     @staticmethod
     def getUI(ui_configuration, board):
+        if board.depth > 1:
+            return UI3D(board)
         if ui_configuration:
             return UI(board)
         return EmptyUI()

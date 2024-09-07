@@ -2,8 +2,10 @@ import numpy as np
 from winning_patterns import WinningPatterns
 from scipy.signal import convolve
 
+
 class Board:
     EMPTY_CELL = -1
+
     def __init__(self, rows, cols, depth=1, num_of_players=2, board=None, conv_res_dict=None, last_disc_location=None):
         if board is None:
             self._board = np.ones((rows, cols, depth)) * self.EMPTY_CELL
@@ -29,7 +31,8 @@ class Board:
             self.conv_res_by_direction[direction] = np.zeros((self.num_of_players, rows, cols, depth))
 
     def __copy__(self):
-        b = Board(self.rows, self.cols, self.depth, self.num_of_players, self._board.copy(), {}, self.last_disc_location)
+        b = Board(self.rows, self.cols, self.depth, self.num_of_players, self._board.copy(), {},
+                  self.last_disc_location)
         # b.conv_res_by_direction = self.conv_res_by_direction
         # deep copy the conv_res_by_direction
         b.conv_res_by_direction = {k: v.copy() for k, v in self.conv_res_by_direction.items()}
@@ -79,7 +82,18 @@ class Board:
 
     def __repr__(self):
         empty_char = str(self.EMPTY_CELL)
-        return str(np.flip(self._board.squeeze(), 0)).replace('.', '.,').replace(']', '],')
+        if self.depth == 1:
+            return str(np.flip(self._board.squeeze(), 0)).replace('.', '.,').replace(']', '],')
+        final_board_str = ""
+        boards_to_print = []
+        for depth in range(self.depth):
+            boards_to_print.append(np.flip(self._board[:, :, depth], 0))
+        for row in range(self.rows):
+            for depth in range(self.depth):
+                final_board_str += str(boards_to_print[depth][row]).replace(empty_char, '.,') + "||"
+            final_board_str += "\n"
+        final_board_str += "**************************************************************************"
+        return final_board_str
 
     def have_we_won(self, winning_streak):
         if self.last_disc_location is None:
