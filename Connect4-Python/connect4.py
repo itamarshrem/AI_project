@@ -1,13 +1,11 @@
 from collections import defaultdict
-
 import time
-import random
-
 import numpy as np
 from game import Game
 from player import PlayerFactory
 from winning_patterns import WinningPatterns
 import utils
+from create_plots import plot_data
 
 
 def parse_args():
@@ -54,7 +52,8 @@ def print_results(results, num_of_games, game):
             print(f"player {game.players[player].__name__()} (index {player}) won {count} games. winning percentage: {count * 100 / num_of_games}%")
 
 
-def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape):
+def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape, rl_currently_learning):
+    victories = []
     results = defaultdict(lambda: 0)
     for i in range(num_of_games):
         start_time = time.time()
@@ -62,6 +61,16 @@ def run_all_games(num_of_games, game, display_screen, board_configuration, board
         results[game_result] += 1
         print(f"player {game.players[game_result].__name__()} with index {game_result} won the game. winning percentage: {results[game_result] * 100 / (i + 1)}%")
         print(f"game {i + 1}: time taken: {time.time() - start_time} seconds")
+        if game.players[game_result].__name__() == "QLearningPlayer":
+            victories.append(1)
+        else:
+            victories.append(0)
+    if rl_currently_learning:
+        np_victories = np.array(victories)
+        np_victories = (np.cumsum(np_victories) * 100) / np.arange(1, num_of_games + 1)
+        plot_data([np_victories], ["rl agent"], "RL agent winning percentage during training", "game number",
+                  "percentage of winning so far")
+
     print_results(results, num_of_games, game)
     for player in game.players:
         step_time_average = player.get_step_average_time()
@@ -79,7 +88,7 @@ def save_rl_agent(args, players):
 def main(args):
     players = create_players(args)
     game = Game(args.winning_streak, players, sleep_between_actions=args.sleep)
-    run_all_games(args.num_of_games, game, args.display_screen, args.board_configuration, args.board_shape)
+    run_all_games(args.num_of_games, game, args.display_screen, args.board_configuration, args.board_shape, args.rl_currently_learning)
     if args.rl_currently_learning:
         save_rl_agent(args, players)
 
