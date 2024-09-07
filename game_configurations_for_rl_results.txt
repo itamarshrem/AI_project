@@ -80,6 +80,19 @@ player QLearningPlayer (index 0) won 248 games. winning percentage: 24.8%
 player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 752 games. winning percentage: 75.2%
 ############################################################################################################
 ############################################################################################################
+title: rl with master complex gamma 0 vs complex gamma 0.8, and then trained 60000 vs defensive(my pc couldn't handle it...):
+-size 6 7 1 -p rl_agent baseline -ef none defensive -d 2 1 -ws 4 -ng 60000 -g 0 0.6 --rl_currently_learning -lrl
+results:
+vs defensive:
+
+vs offensive:
+
+vs complex g=0.2 d=2:
+
+vs complex g=0.2 d=4:
+
+############################################################################################################
+############################################################################################################
 title: rl with master complex gamma 0 vs complex gamma 0.95:
 -size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.95 --rl_currently_learning
 results:
@@ -116,3 +129,23 @@ vs defensive:
 vs offensive:
 vs complex g=0.2 d=2:
 vs complex g=0.2 d=4:
+############################################################################################################
+############################################################################################################
+title: rl with master complex gamma 1(totally random master) vs complex gamma 0.8(best opponent found):
+-size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.8 --rl_currently_learning
+results:
+vs defensive:
+player BaselinePlayer_defensive_evaluation_function (index 1) won 827 games. winning percentage: 82.7%
+player QLearningPlayer (index 0) won 154 games. winning percentage: 15.4%
+number of ties: 19, tie percentage: 1.9%
+vs offensive:
+player BaselinePlayer_offensive_evaluation_function (index 1) won 55 games. winning percentage: 5.5%
+player QLearningPlayer (index 0) won 945 games. winning percentage: 94.5%
+vs complex g=0.2 d=2:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 661 games. winning percentage: 66.1%
+player QLearningPlayer (index 0) won 339 games. winning percentage: 33.9%
+vs complex g=0.2 d=4:
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 842 games. winning percentage: 84.2%
+player QLearningPlayer (index 0) won 158 games. winning percentage: 15.8%
+############################################################################################################
+############################################################################################################
