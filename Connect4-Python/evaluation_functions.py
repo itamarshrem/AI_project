@@ -96,6 +96,44 @@ def all_complex_evaluation_function(board, player_index, num_of_players, winning
     # assert final_score == _all_complex_evaluation_function(board, player_index, num_of_players, winning_streak)
     return final_score
 
+def only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, all_complex_mode=False):
+    players_streaks = {}
+
+    for direction, conv_res in board.conv_res_by_direction.items():
+        mask = (conv_res.sum(axis=0) == conv_res)
+        not_blocked_streaks = (conv_res * mask)
+        new_max_score = calc_max_streak(not_blocked_streaks[player_index])
+        update_max_streaks_score(players_streaks, player_index, new_max_score)
+
+        next_player_index = (player_index + 1) % num_of_players
+        while next_player_index != player_index:
+            new_player_score = calc_max_streak(not_blocked_streaks[next_player_index])
+            update_max_streaks_score(players_streaks, next_player_index, new_player_score)
+            next_player_index = (next_player_index + 1) % num_of_players
+
+    opponents_scores = [score for i, score in players_streaks.items() if i != player_index]
+    max_opponents_streaks_score = max(opponents_scores, key=lambda x: x[0])
+    if max_opponents_streaks_score[0] == (2 ** winning_streak) and max_opponents_streaks_score[1] > 0:
+        max_opponents_streaks_score[0] = 2 ** (winning_streak + 3)
+
+    cur_player_score = players_streaks[player_index]
+    if cur_player_score[0] == (2 ** winning_streak) and cur_player_score[1] > 0:
+        cur_player_score[0] = 2 ** (winning_streak + 3)
+
+    return cur_player_score[0], cur_player_score[1], max_opponents_streaks_score[0], max_opponents_streaks_score[0]
+
+
+def only_best_opponent_evaluation_function(board, player_index, num_of_players, winning_streak):
+    cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
+        only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, all_complex_mode=True)
+
+    if cur_player_max_streak == (2 ** (winning_streak + 3)) and cur_player_max_streak_app > 0:
+        return cur_player_max_streak, cur_player_max_streak_app
+
+    final_score = (cur_player_max_streak - max_opponents_streaks, cur_player_max_streak_app - max_opponents_streaks_app)
+    # assert final_score == _all_complex_evaluation_function(board, player_index, num_of_players, winning_streak)
+    return final_score
+
 
 def simple_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
