@@ -4,7 +4,7 @@ import numpy as np
 def plot_data(data, labels, title, x_label, y_label):
     #add x axis array, with specific values. for example i want the x values to be 0.6, 0.4, 0.2, 0, and the y values will be the corresponding values in the data lists
     x = np.arange(1, len(data[0]) + 1)
-    plt.xticks(x, [0.6, 0.4, 0.2, 0]) # to run with gammas
+    # plt.xticks(x, [0.6, 0.4, 0.2, 0]) # to run with gammas
     #plot each list of data with the corresponding label
 
     for i in range(len(data)):
