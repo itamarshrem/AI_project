@@ -84,13 +84,18 @@ title: rl with master complex gamma 0 vs complex gamma 0.8, and then trained 600
 -size 6 7 1 -p rl_agent baseline -ef none defensive -d 2 1 -ws 4 -ng 60000 -g 0 0.6 --rl_currently_learning -lrl
 results:
 vs defensive:
-
+player BaselinePlayer_defensive_evaluation_function (index 1) won 617 games. winning percentage: 61.7%
+player QLearningPlayer (index 0) won 361 games. winning percentage: 36.1%
+number of ties: 22, tie percentage: 2.2%
 vs offensive:
-
+player BaselinePlayer_offensive_evaluation_function (index 1) won 302 games. winning percentage: 30.2%
+player QLearningPlayer (index 0) won 698 games. winning percentage: 69.8%
 vs complex g=0.2 d=2:
-
+player QLearningPlayer (index 0) won 838 games. winning percentage: 83.8%
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 162 games. winning percentage: 16.2%
 vs complex g=0.2 d=4:
-
+player AlphaBetaAgent_all_complex_evaluation_function (index 1) won 855 games. winning percentage: 85.5%
+player QLearningPlayer (index 0) won 145 games. winning percentage: 14.5%
 ############################################################################################################
 ############################################################################################################
 title: rl with master complex gamma 0 vs complex gamma 0.95:
