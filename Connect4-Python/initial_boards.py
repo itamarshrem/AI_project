@@ -4,14 +4,15 @@ import random
 
 from board import Board
 from winning_patterns import WinningPatterns
+from evaluation_functions import *
 
 edge_case1 = np.array(
     [[-1., -1., -1., -1., -1, -1., -1., ],
-     [-1., -1., -1., -1., -1., -1., -1., ],
-     [-1., -1., -1., -1., -1., -1., -1., ],
-     [-1., -1., -1.,-1., -1., -1., -1., ],
-     [-1., -1., 1., 0., 2., -1., -1., ],
-     [-1., -1., 1., 0., 2., -1., -1., ], ]
+     [-1., -1., -1., -1., -1., 1., 2., ],
+     [-1., -1., -1., 1., -1., 1., 2., ],
+     [-1., -1., -1., 1., -1., 1., 2., ],
+     [1., -1., 2., 0., -1., 2., 0., ],
+     [0., 0., 1., 0., -1., 2., 0., ], ]
 )
 
 
@@ -26,7 +27,8 @@ class BoardFactory:
             np.random.seed(0)
             board = np.flip(np.expand_dims(edge_case1, 2), 0)
             conv_res = BoardFactory.init_conv_res_for_given_board(board, num_of_players)
-            return Board(rows, cols, depth, num_of_players, board, conv_res_dict=conv_res, last_disc_location=(1, 3, 0))
+            board_obj =  Board(rows, cols, depth, num_of_players, board, conv_res_dict=conv_res, last_disc_location=(1, 3, 0))
+            print(all_complex_evaluation_function(board_obj, 0, num_of_players, 4))
 
     @staticmethod
     def init_conv_res_for_given_board(board, num_of_players):

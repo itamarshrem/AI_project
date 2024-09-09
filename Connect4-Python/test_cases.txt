@@ -1,11 +1,12 @@
 
 ------------------------------------------------------------------------------------------------
 Tasks:
-- work on the report, add results section - itamar
 - check how we can improve the argparse shit - itamar
 - add README
 - create a movie about out project
+- need to clean install the repo and see that everything works
 - add another previous work from the internet
+-
 - compare runtimes of different agents
 
 ________________________________________________________________________________________________
