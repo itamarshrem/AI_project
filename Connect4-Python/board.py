@@ -1,7 +1,5 @@
 import numpy as np
 from winning_patterns import WinningPatterns
-from scipy.signal import convolve
-
 
 class Board:
     EMPTY_CELL = -1
@@ -33,8 +31,6 @@ class Board:
     def __copy__(self):
         b = Board(self.rows, self.cols, self.depth, self.num_of_players, self._board.copy(), {},
                   self.last_disc_location)
-        # b.conv_res_by_direction = self.conv_res_by_direction
-        # deep copy the conv_res_by_direction
         b.conv_res_by_direction = {k: v.copy() for k, v in self.conv_res_by_direction.items()}
         return b
 
@@ -64,7 +60,6 @@ class Board:
         indices_dict = WinningPatterns.build_needed_indices(winning_streak, location)
         for direction, indices in indices_dict.items():
             res = self.conv_res_by_direction[direction]
-            # res[player, indices[0, :], indices[1, :], indices[2, :]] += 1
             np.add.at(res[player], (indices[0, :], indices[1, :], indices[2, :]), 1)
 
     def is_valid_location(self, location):
@@ -105,26 +100,3 @@ class Board:
             if np.any(conv_res[int(current_player_index), :, :, :] == winning_streak):
                 return True
         return False
-
-    # def have_we_won(self, winning_streak):
-    #     if self.last_disc_location is None:
-    #         return False
-    #     # Convolve the board with each kernel and check if any result contains self.winning_streak
-    #     x, y, z = self.last_disc_location
-    #     current_player_index = self.board[x, y, z]
-    #     slicing = (
-    #         slice(max(x - (winning_streak - 1), 0), min(x + winning_streak, self.rows)),
-    #         slice(max(y - (winning_streak - 1), 0), min(y + winning_streak, self.cols)),
-    #         slice(max(z - (winning_streak - 1), 0), min(z + winning_streak, self.depth))
-    #     )
-    #     board = self.board[slicing]
-    #     for direction, kernel in WinningPatterns.PATTERNS.items():
-    #         if self.depth == 1 and kernel.shape[2] > 1:
-    #             continue
-    #         convolved = convolve((board == current_player_index).astype(int), kernel, mode='valid', method='direct')
-    #         current_conv_res =  self.conv_res_by_direction[direction][int(current_player_index), :, :, :]
-    #         assert np.all(convolve((self.board == current_player_index).astype(int), kernel, mode='valid', method='direct') == current_conv_res)
-    #         assert np.any(convolved == winning_streak) == np.any(current_conv_res[slicing] == winning_streak)
-    #         if np.any(convolved == winning_streak):
-    #             return True
-    #     return False

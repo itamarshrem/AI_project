@@ -122,7 +122,7 @@ class UI3D(BaseUI):
 class UIFactory:
     @staticmethod
     def getUI(ui_configuration, board):
-        if board.depth > 1:
+        if ui_configuration and board.depth > 1:
             return UI3D(board)
         if ui_configuration:
             return UI(board)

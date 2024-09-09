@@ -59,7 +59,6 @@ class Game:
         rl_player = self.players[rl_index]
         cur_player_index = 0
         winning_player = self.TIE
-        # let all other opponents play before the rl agent, so he will be first in the loop
         while cur_player_index != rl_index and winning_player == self.TIE and not self.board.is_board_full():
             winning_player, _ = self.play_turn(cur_player_index)
             cur_player_index = Player.get_next_player(cur_player_index, num_of_players)
