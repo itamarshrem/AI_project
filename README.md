@@ -4,7 +4,7 @@ This repository contains a Connect 4 game with several AI players implemented, i
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/...
+   git clone https://github.com/itamarshrem/AI_project.git
    ```
 
 2. Install the necessary Python dependencies:
