@@ -14,7 +14,7 @@ def parse_args():
     default_players_num = 2
     parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[6, 7, 1], help='size of the board')
     parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline", "cnn_agent"], help='human, random, minmax, alpha_beta, rl_agent, baseline, cnn_agent')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "all_complex",  "defensive", "offensive", "ibef2", "none"], help='simple, all_complex, defensive, offensive, ibef, none')
+    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "all_complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, all_complex, defensive, offensive, ibef2, none, only_best_opponent')
     parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
     parser.add_argument('-g', '--gamma', type=float, nargs="*", default=[0] * default_players_num, help='probability of random action of MultiAgentSearchAgent')
     parser.add_argument('-ws', '--winning_streak', type=int, default=4, help='Number of consecutive pieces to win')

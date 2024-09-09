@@ -1,0 +1,77 @@
+alpha_beta all_complex vs offensive vs offensive
+-size 6 7 1 -p alpha_beta baseline baseline -ef all_complex offensive offensive -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 0) won 93 games. winning percentage: 93.0%
+player BaselinePlayer_offensive_evaluation_function (index 2) won 3 games. winning percentage: 3.0%
+player BaselinePlayer_offensive_evaluation_function (index 1) won 1 games. winning percentage: 1.0%
+number of ties: 3, tie percentage: 3.0%
+#######################################################################################################################
+alpha_beta all_complex vs defensive vs defensive
+-size 6 7 1 -p alpha_beta baseline baseline -ef all_complex defensive defensive -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 0) won 84 games. winning percentage: 84.0%
+player BaselinePlayer_defensive_evaluation_function (index 2) won 2 games. winning percentage: 2.0%
+player BaselinePlayer_defensive_evaluation_function (index 1) won 1 games. winning percentage: 1.0%
+number of ties: 13, tie percentage: 13.0%
+#######################################################################################################################
+alpha_beta all_complex vs offensive vs defensive
+-size 6 7 1 -p alpha_beta baseline baseline -ef all_complex offensive defensive -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 0) won 82 games. winning percentage: 82.0%
+player BaselinePlayer_defensive_evaluation_function (index 2) won 4 games. winning percentage: 4.0%
+number of ties: 14, tie percentage: 14.0%
+#######################################################################################################################
+alpha_beta all_complex vs offensive vs random
+-size 6 7 1 -p alpha_beta baseline random -ef all_complex offensive none -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 0) won 98 games. winning percentage: 98.0%
+player BaselinePlayer_offensive_evaluation_function (index 1) won 1 games. winning percentage: 1.0%
+number of ties: 1, tie percentage: 1.0%
+#######################################################################################################################
+alpha_beta all_complex vs defensive vs random
+-size 6 7 1 -p alpha_beta baseline random -ef all_complex defensive none -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_all_complex_evaluation_function (index 0) won 92 games. winning percentage: 92.0%
+player BaselinePlayer_defensive_evaluation_function (index 1) won 1 games. winning percentage: 1.0%
+number of ties: 7, tie percentage: 7.0%
+#######################################################################################################################
+alpha_beta only_best_opponent vs offensive vs offensive
+-size 6 7 1 -p alpha_beta baseline baseline -ef only_best_opponent offensive offensive -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_only_best_opponent_evaluation_function (index 0) won 90 games. winning percentage: 90.0%
+player BaselinePlayer_offensive_evaluation_function (index 1) won 5 games. winning percentage: 5.0%
+player BaselinePlayer_offensive_evaluation_function (index 2) won 4 games. winning percentage: 4.0%
+number of ties: 1, tie percentage: 1.0%
+#######################################################################################################################
+alpha_beta only_best_opponent vs defensive vs defensive
+-size 6 7 1 -p alpha_beta baseline baseline -ef only_best_opponent defensive defensive -d 6 0 0  -ws 4 -ng 100
+results:
+player BaselinePlayer_defensive_evaluation_function (index 2) won 1 games. winning percentage: 1.0%
+player BaselinePlayer_defensive_evaluation_function (index 1) won 0 games. winning percentage: 0.0%
+player AlphaBetaAgent_only_best_opponent_evaluation_function (index 0) won 76 games. winning percentage: 76.0%
+number of ties: 23, tie percentage: 23.0%
+#######################################################################################################################
+alpha_beta only_best_opponent vs offensive vs defensive
+-size 6 7 1 -p alpha_beta baseline baseline -ef only_best_opponent offensive defensive -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_only_best_opponent_evaluation_function (index 0) won 74 games. winning percentage: 74.0%
+player BaselinePlayer_defensive_evaluation_function (index 2) won 2 games. winning percentage: 2.0%
+player BaselinePlayer_offensive_evaluation_function (index 1) won 2 games. winning percentage: 2.0%
+number of ties: 22, tie percentage: 22.0%
+#######################################################################################################################
+alpha_beta only_best_opponent vs offensive vs random
+-size 6 7 1 -p alpha_beta baseline random -ef only_best_opponent offensive none -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_only_best_opponent_evaluation_function (index 0) won 95 games. winning percentage: 95.0%
+player BaselinePlayer_offensive_evaluation_function (index 1) won 4 games. winning percentage: 4.0%
+player RandomPlayer (index 2) won 0 games. winning percentage: 0.0%
+number of ties: 1, tie percentage: 1.0%
+#######################################################################################################################
+alpha_beta only_best_opponent vs defensive vs random
+-size 6 7 1 -p alpha_beta baseline random -ef only_best_opponent defensive none -d 6 0 0  -ws 4 -ng 100
+results:
+player AlphaBetaAgent_only_best_opponent_evaluation_function (index 0) won 95 games. winning percentage: 95.0%
+player RandomPlayer (index 2) won 2 games. winning percentage: 2.0%
+player BaselinePlayer_defensive_evaluation_function (index 1) won 1 games. winning percentage: 1.0%
+number of ties: 2, tie percentage: 2.0%
+#######################################################################################################################

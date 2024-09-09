@@ -442,5 +442,7 @@ class PlayerFactory:
             return offensive_evaluation_function
         elif evaluation_function == "ibef2":
             return ibef2_evaluation_function
+        elif evaluation_function == "only_best_opponent":
+            return only_best_opponent_evaluation_function
         else:
             return None
