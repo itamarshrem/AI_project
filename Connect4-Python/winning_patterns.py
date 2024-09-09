@@ -106,10 +106,6 @@ class WinningPatterns:
             cur_y_cords = y_cords[dy]
             cur_z_cords = z_cords[dz]
 
-            # cur_x_cords = WinningPatterns.build_range(dx, x, winning_streak)
-            # cur_y_cords = WinningPatterns.build_range(dy, y, winning_streak)
-            # cur_z_cords = WinningPatterns.build_range(dz, z, winning_streak)
-
             coordinates = np.vstack((cur_x_cords, cur_y_cords, cur_z_cords))
             valid_mask = (coordinates[0, :] >= 0) & (coordinates[0, :] < WinningPatterns.CONV_RES_SHAPES[direction][0]) & \
                          (coordinates[1, :] >= 0) & (coordinates[1, :] < WinningPatterns.CONV_RES_SHAPES[direction][1]) & \

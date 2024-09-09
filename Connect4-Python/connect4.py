@@ -11,29 +11,25 @@ from create_plots import plot_data
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
-    default_players_num = 2
-    parser.add_argument('-size', '--board_shape', type=int, nargs=3, default=[6, 7, 1], help='size of the board')
-    parser.add_argument('-p', '--players', nargs="*", type=str, default=["human"] * default_players_num, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline", "cnn_agent"], help='human, random, minmax, alpha_beta, rl_agent, baseline, cnn_agent')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", default=["none"] * default_players_num, type=str, choices=["simple", "all_complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, all_complex, defensive, offensive, ibef2, none, only_best_opponent')
-    parser.add_argument('-d', '--depths', type=int, nargs="*", default=[2] * default_players_num, help='Depth of the search tree')
-    parser.add_argument('-g', '--gamma', type=float, nargs="*", default=[0] * default_players_num, help='probability of random action of MultiAgentSearchAgent')
-    parser.add_argument('-ws', '--winning_streak', type=int, default=4, help='Number of consecutive pieces to win')
+    parser.add_argument('-size', '--board_shape', type=int, nargs=3, required=True, help='size of the board')
+    parser.add_argument('-p', '--players', nargs="*", type=str, required=True, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline"], help='human, random, minmax, alpha_beta, rl_agent, baseline')
+    parser.add_argument('-ef', '--eval_functions', nargs="*", required=True, type=str, choices=["simple", "complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, complex, defensive, offensive, ibef2, none, only_best_opponent')
+    parser.add_argument('-d', '--depths', type=int, nargs="*", required=True, help='Depth of the search tree')
+    parser.add_argument('-g', '--gamma', type=float, nargs="*", required=True, help='probability of random action of MultiAgentSearchAgent')
+    parser.add_argument('-ws', '--winning_streak', type=int, required=True, help='Number of consecutive pieces to win')
     parser.add_argument('-s', '--sleep', action='store_true', help='Sleep between actions')
     parser.add_argument('-lrl', '--load_rl_agent', action='store_true', help='load rl agent from memory')
-    parser.add_argument('--rl_currently_learning', action='store_true', help= 'if set, the rlagent is learning')
-    parser.add_argument('-ng', '--num_of_games', type=int, default=1, help='Number of consecutive games')
+    parser.add_argument('--rl_currently_learning', action='store_true', help= 'if set, the rl_agent is learning')
+    parser.add_argument('-ng', '--num_of_games', type=int, required=True, help='Number of consecutive games')
     parser.add_argument('-ui', '--display_screen', action='store_true', help='if set, ui is displayed')
     parser.add_argument('-bc', '--board_configuration', type=str, default="None", choices=["None", "edge_case1"], help='start a game with a specific board')
 
-    return parser.parse_args()
-
+    parsed_args = parser.parse_args()
+    return parsed_args
 
 def validate_input(args):
-    if len(args.players) != len(args.eval_functions):
-        raise ValueError("Number of players and evaluation functions should be the same")
-    if len(args.players) != len(args.depths):
-        raise ValueError("Number of players and depths should be the same")
-
+    if not len(args.players) == len(args.eval_functions) == len(args.depths) == len(args.gamma):
+        raise ValueError("Number of players, evaluation functions, depths and gammas should be the same, non relevant values for different players are ignored")
 
 def create_players(args):
     players = []

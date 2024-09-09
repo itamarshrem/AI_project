@@ -1,15 +1,9 @@
 import time
-import torch
 import utils
 
 from abc import abstractmethod
 from evaluation_functions import *
 from board import Board
-from cnn import CNN
-
-
-
-
 
 class Player:
     MIN_SCORE = -np.inf, -np.inf
@@ -94,8 +88,6 @@ class MultiAgentSearchAgent(Player):
 
     def get_step_average_time(self):
         return np.mean(self.step_times)
-
-
 
 class MinmaxAgent(MultiAgentSearchAgent):
 
@@ -231,15 +223,6 @@ class BaselinePlayer(MultiAgentSearchAgent):
         action = legal_actions[np.random.choice(len(legal_actions), p=probabilities)]
         return action
 
-        # choose the action with the highest value
-        # max_value = actions_values[0]
-        # max_action = legal_actions[0]
-        # for i in range(1, len(actions_values)):
-        #     if actions_values[i] > max_value:
-        #         max_value = actions_values[i]
-        #         max_action = legal_actions[i]
-        # return max_action
-
 
 class QLearningPlayer(Player):
 
@@ -257,7 +240,7 @@ class QLearningPlayer(Player):
         self.board_shape = board_shape
         self.num_of_players = num_of_players
         if with_master:
-            evaluation_function = PlayerFactory.get_evaluation_function("all_complex")
+            evaluation_function = PlayerFactory.get_evaluation_function("complex")
             self.master = AlphaBetaAgent(index, evaluation_function, 2, 2, 0)
         else:
             self.master = RandomPlayer(index)
@@ -331,12 +314,6 @@ class QLearningPlayer(Player):
 
         self.exploration_rate *= self.exploration_decay
 
-    # def old_get_state_representation(self, board):
-    #     """
-    #     This method returns a tuple that uniquely represents the state of the 3d board.
-    #     """
-    #     return tuple(board.board.flatten())
-
     def get_state_representation(self, board):
         """
         This method returns a tuple that uniquely represents the state of the 3d board.
@@ -352,42 +329,6 @@ class QLearningPlayer(Player):
 
     def get_step_average_time(self):
         return np.mean(self.step_times)
-
-
-class CnnAgent(Player):
-    # by getting a board the agent will run a cnn model to get the value of the model and than return the best action
-
-    def __init__(self, model, player_index, winning_streak, board_shape, num_of_players):
-        super().__init__(player_index)
-        self.model = model
-        self.player_index = player_index
-        self.winning_streak = winning_streak
-        self.board_shape = board_shape
-        self.num_of_players = num_of_players
-
-    def get_action(self, board, num_of_players, winning_streak, ui=None):
-        # get the best action
-        action = self._get_best_action(board)
-        return action
-
-    def _get_board_value(self, board):
-        return self.model.predict(board)
-
-    def _get_best_action(self, board):
-        # get the best action
-        legal_actions = board.get_legal_actions(self.winning_streak)
-        best_action = None
-        best_value = -float('inf')
-        for action in legal_actions:
-            board_copy = board.__copy__()
-            board_copy.apply_action(action, self.player_index, self.winning_streak)
-            board_for_cnn = utils.pre_process_board(board_copy.board, board.board.shape, self.num_of_players)
-            action_value = self._get_board_value(board_for_cnn)
-            if action_value > best_value:
-                best_value = action_value
-                best_action = action
-        return best_action
-
 
 class PlayerFactory:
     @staticmethod
@@ -406,22 +347,11 @@ class PlayerFactory:
             return PlayerFactory.create_rl_agent(args, index)
         elif player_type == "baseline":
             return BaselinePlayer(index, evaluation_function)
-        elif player_type == 'cnn_agent':
-            rows, cols, depth = args.board_shape
-            num_of_players = len(args.players)
-            model = CNN((num_of_players, rows, cols), args.winning_streak)
-            model.load_state_dict(torch.load('Connect4-Python/cnn/cnn_model_weights.pth'))
-            return CnnAgent(model, index, args.winning_streak, args.board_shape, num_of_players)
         else:
             raise ValueError(f"Unknown player type: {player_type}")
 
     @staticmethod
     def create_rl_agent(args, index):
-        # opponents = [None] * len(args.players)
-        # for i in range(len(args.players)):
-        #     if i != index:
-        #         opponents[i] = PlayerFactory.get_player(args.players[i], i, args)
-
         if args.load_rl_agent:
             full_path_filename = utils.get_rl_agent_save_path(args.winning_streak, args.board_shape, index)
             utils.extract_files_from_zip(args.winning_streak, args.board_shape, index)
@@ -434,8 +364,8 @@ class PlayerFactory:
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
             return simple_evaluation_function
-        elif evaluation_function == "all_complex":
-            return all_complex_evaluation_function
+        elif evaluation_function == "complex":
+            return complex_evaluation_function
         elif evaluation_function == "defensive":
             return defensive_evaluation_function
         elif evaluation_function == "offensive":
