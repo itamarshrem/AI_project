@@ -1,23 +1,23 @@
 connect4 alpha_beta v rl_agent
--size 6 7 1 -p alpha_beta rl_agent -ef all_complex none -ws 4 -ng 100
+-size 6 7 1 -p alpha_beta rl_agent -ef complex none -ws 4 -ng 100
 
 connect4 human v human v minmax
--size 6 7 1 -p human human minmax -ef none none all_complex -d 2 2 1 -ws 4 -ng 1 -ui
+-size 6 7 1 -p human human minmax -ef none none complex -d 2 2 1 -ws 4 -ng 1 -ui
 
 connect4 human v minmax
--size 6 7 1 -p human minmax -ef none all_complex -d 2 2 -ws 4 -ng 1 -ui
+-size 6 7 1 -p human minmax -ef none complex -d 2 2 -ws 4 -ng 1 -ui
 
 connect4 random v alphaBeta
--size 6 7 1 -p random alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100
+-size 6 7 1 -p random alpha_beta -ef none complex -d 2 2 -ws 4 -ng 100
 
 connect4 random v minmax
--size 6 7 1 -p random minmax -ef none all_complex -d 2 2 -ws 4 -ng 100
+-size 6 7 1 -p random minmax -ef none complex -d 2 2 -ws 4 -ng 100
 
 connect4 random v random v alphabeta
--size 6 7 1 -p random random alpha_beta -ef none none all_complex -d 2 2 2 -ws 4 -ng 100
+-size 6 7 1 -p random random alpha_beta -ef none none complex -d 2 2 2 -ws 4 -ng 100
 
 connect4 random v random v minmax
--size 6 7 1 -p random random minmax -ef none none all_complex -d 2 2 2 -ws 4 -ng 100
+-size 6 7 1 -p random random minmax -ef none none complex -d 2 2 2 -ws 4 -ng 100
 
 connect4 random v rl_agent
 -size 6 7 1 -p random rl_agent -ef none none -ws 4 -ng 100

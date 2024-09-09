@@ -27,7 +27,7 @@ Each player can be configured with a different evaluation function, search depth
 ## Command Line Arguments
 - `--board_shape` (`-size`): Specifies the board size (required).
 - `--players` (`-p`): List of players participating in the game (required). Choices include `"human"`, `"random"`, `"minmax"`, `"alpha_beta"`, `"rl_agent"`, and `"baseline"`.
-- `--eval_functions` (`-ef`): Specifies the evaluation function for each player (required). Choices include `"simple"`, `"all_complex"`, `"defensive"`, `"offensive"`, `"ibef2"`, `"none"`, and `"only_best_opponent"`. These are relevant for `minmax`, `alpha_beta`, and `baseline` players only).
+- `--eval_functions` (`-ef`): Specifies the evaluation function for each player (required). Choices include `"simple"`, `"complex"`, `"defensive"`, `"offensive"`, `"ibef2"`, `"none"`, and `"only_best_opponent"`. These are relevant for `minmax`, `alpha_beta`, and `baseline` players only).
 - `--depths` (`-d`): Search depth for each player (required). This is relevant for `minmax` and `alpha_beta` players only.
 - `--gamma` (`-g`): Probability of a random action for search agents (required). This is relevant for `minmax` and `alpha_beta` players only (Gamma=0 is deterministic).
 - `--winning_streak` (`-ws`): Number of consecutive pieces required to win the game (required).
@@ -60,7 +60,7 @@ This setup allows flexibility while ensuring that all required arguments are pro
 Run 100 games between a baseline player and an Alpha-Beta agent using the offensive evaluation function.
    
    ```bash
-   python connect4_game.py -size 6 7 5 -p baseline alpha_beta -ef offensive all_complex -d 1 4 -g 0 0.6 -ws 4 -ng 100
+   python connect4_game.py -size 6 7 5 -p baseline alpha_beta -ef offensive complex -d 1 4 -g 0 0.6 -ws 4 -ng 100
    ```
 
 **Defensive vs Complex Agent (Depth = 2)**
@@ -68,7 +68,7 @@ Run 100 games between a baseline player and an Alpha-Beta agent using the offens
 Run 1000 games between a baseline player with a defensive evaluation function and an Alpha-Beta agent using a complex evaluation function.
 
    ```bash
-   python connect4_game.py -size 6 7 1 -p baseline alpha_beta -ef defensive all_complex -d 1 2 -g 0 0 -ws 4 -ng 1000
+   python connect4_game.py -size 6 7 1 -p baseline alpha_beta -ef defensive complex -d 1 2 -g 0 0 -ws 4 -ng 1000
    ```
 
 **RL Training vs Alpha-Beta Agent (Gamma = 0.95)**
@@ -76,7 +76,7 @@ Run 1000 games between a baseline player with a defensive evaluation function an
 Train an RL agent against an Alpha-Beta agent for 100,000 games. The RL agent has gamma = 0 and the Alpha-Beta agent has gamma = 0.95.
 
    ```bash
-   python connect4_game.py -size 6 7 1 -p rl_agent alpha_beta -ef none all_complex -d 2 2 -ws 4 -ng 100000 -g 0 0.95 --rl_currently_learning
+   python connect4_game.py -size 6 7 1 -p rl_agent alpha_beta -ef none complex -d 2 2 -ws 4 -ng 100000 -g 0 0.95 --rl_currently_learning
    ```
 
 **Testing RL Agent vs Defensive Agent**

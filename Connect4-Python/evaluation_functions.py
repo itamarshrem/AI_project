@@ -13,7 +13,7 @@ def update_max_streaks_score(player_streaks, cur_player_index, new_max_score_tup
         player_streaks[cur_player_index][1] = player_streaks[cur_player_index][1] + new_max_score_tuple[1]
 
 
-def complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, all_complex_mode=False):
+def complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=False):
     players_streaks = {}
     alpha = 1 / (num_of_players - 1)
 
@@ -38,7 +38,7 @@ def complex_evaluation_function_helper(board, player_index, num_of_players, winn
         if max_opponent_streaks == (2 ** winning_streak) and max_opponent_streaks_appearance > 0:
             max_opponent_streaks = 2 ** (winning_streak + 3)
         max_opponents_streaks += alpha * max_opponent_streaks
-        if max_opponent_streaks == cur_player_score[0] or not all_complex_mode:
+        if max_opponent_streaks == cur_player_score[0] or not complex_mode:
             max_opponents_streaks_appearance += max_opponent_streaks_appearance
         next_player_index = (next_player_index + 1) % num_of_players
 
@@ -48,9 +48,9 @@ def complex_evaluation_function_helper(board, player_index, num_of_players, winn
     return cur_player_score[0], cur_player_score[1], max_opponents_streaks, max_opponents_streaks_appearance
 
 
-def all_complex_evaluation_function(board, player_index, num_of_players, winning_streak):
+def complex_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
-        complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, all_complex_mode=True)
+        complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=True)
 
     if cur_player_max_streak == (2 ** (winning_streak + 3)) and cur_player_max_streak_app > 0:
         return cur_player_max_streak, cur_player_max_streak_app
@@ -59,7 +59,7 @@ def all_complex_evaluation_function(board, player_index, num_of_players, winning
     return final_score
 
 
-def only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, all_complex_mode=False):
+def only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=False):
     players_streaks = {}
 
     for direction, conv_res in board.conv_res_by_direction.items():
@@ -88,7 +88,7 @@ def only_best_opponent_evaluation_function_helper(board, player_index, num_of_pl
 
 def only_best_opponent_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
-        only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, all_complex_mode=True)
+        only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=True)
 
     if cur_player_max_streak == (2 ** (winning_streak + 3)) and cur_player_max_streak_app > 0:
         return cur_player_max_streak, cur_player_max_streak_app

@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-size', '--board_shape', type=int, nargs=3, required=True, help='size of the board')
     parser.add_argument('-p', '--players', nargs="*", type=str, required=True, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline"], help='human, random, minmax, alpha_beta, rl_agent, baseline')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", required=True, type=str, choices=["simple", "all_complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, all_complex, defensive, offensive, ibef2, none, only_best_opponent')
+    parser.add_argument('-ef', '--eval_functions', nargs="*", required=True, type=str, choices=["simple", "complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, complex, defensive, offensive, ibef2, none, only_best_opponent')
     parser.add_argument('-d', '--depths', type=int, nargs="*", required=True, help='Depth of the search tree')
     parser.add_argument('-g', '--gamma', type=float, nargs="*", required=True, help='probability of random action of MultiAgentSearchAgent')
     parser.add_argument('-ws', '--winning_streak', type=int, required=True, help='Number of consecutive pieces to win')
@@ -24,15 +24,12 @@ def parse_args():
     parser.add_argument('-ui', '--display_screen', action='store_true', help='if set, ui is displayed')
     parser.add_argument('-bc', '--board_configuration', type=str, default="None", choices=["None", "edge_case1"], help='start a game with a specific board')
 
-    return parser.parse_args()
-
+    parsed_args = parser.parse_args()
+    return parsed_args
 
 def validate_input(args):
-    if len(args.players) != len(args.eval_functions):
-        raise ValueError("Number of players and evaluation functions should be the same")
-    if len(args.players) != len(args.depths):
-        raise ValueError("Number of players and depths should be the same")
-
+    if not len(args.players) == len(args.eval_functions) == len(args.depths) == len(args.gamma):
+        raise ValueError("Number of players, evaluation functions, depths and gammas should be the same, non relevant values for different players are ignored")
 
 def create_players(args):
     players = []

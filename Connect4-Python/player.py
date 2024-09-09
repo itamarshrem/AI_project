@@ -240,7 +240,7 @@ class QLearningPlayer(Player):
         self.board_shape = board_shape
         self.num_of_players = num_of_players
         if with_master:
-            evaluation_function = PlayerFactory.get_evaluation_function("all_complex")
+            evaluation_function = PlayerFactory.get_evaluation_function("complex")
             self.master = AlphaBetaAgent(index, evaluation_function, 2, 2, 0)
         else:
             self.master = RandomPlayer(index)
@@ -364,8 +364,8 @@ class PlayerFactory:
     def get_evaluation_function(evaluation_function):
         if evaluation_function == "simple":
             return simple_evaluation_function
-        elif evaluation_function == "all_complex":
-            return all_complex_evaluation_function
+        elif evaluation_function == "complex":
+            return complex_evaluation_function
         elif evaluation_function == "defensive":
             return defensive_evaluation_function
         elif evaluation_function == "offensive":
