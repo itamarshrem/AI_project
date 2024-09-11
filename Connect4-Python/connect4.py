@@ -14,8 +14,9 @@ def parse_args():
     parser.add_argument('-size', '--board_shape', type=int, nargs=3, required=True, help='size of the board')
     parser.add_argument('-p', '--players', nargs="*", type=str, required=True, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline"], help='human, random, minmax, alpha_beta, rl_agent, baseline')
     parser.add_argument('-ef', '--eval_functions', nargs="*", required=True, type=str, choices=["simple", "complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, complex, defensive, offensive, ibef2, none, only_best_opponent')
-    parser.add_argument('-d', '--depths', type=int, nargs="*", required=True, help='Depth of the search tree')
-    parser.add_argument('-g', '--gamma', type=float, nargs="*", required=True, help='probability of random action of MultiAgentSearchAgent')
+    num_of_players_inputted = len(parser.parse_known_args()[0].players)
+    parser.add_argument('-d', '--depths', type=int, nargs="*", default= [2 * num_of_players_inputted] * num_of_players_inputted, help='Depth of the search tree')
+    parser.add_argument('-g', '--gamma', type=float, nargs="*", default=[0] * num_of_players_inputted, help='probability of random action of MultiAgentSearchAgent')
     parser.add_argument('-ws', '--winning_streak', type=int, required=True, help='Number of consecutive pieces to win')
     parser.add_argument('-s', '--sleep', action='store_true', help='Sleep between actions')
     parser.add_argument('-lrl', '--load_rl_agent', action='store_true', help='load rl agent from memory')
@@ -28,6 +29,11 @@ def parse_args():
     return parsed_args
 
 def validate_input(args):
+    assert len(args.players) > 1, "Number of players should be at least 2"
+    assert np.sum(np.array(args.board_shape) > 1) > 1, "Board shape should have at least 2 dimensions"
+    minimum_of_board_shape = min(args.board_shape[0], args.board_shape[1], args.board_shape[2] if args.board_shape[2] > 1 else np.inf)
+    assert args.winning_streak <= minimum_of_board_shape, "winning streak should be less than the minimum of the board shape"
+    assert args.winning_streak > 0, "winning streak should be positive"
     if not len(args.players) == len(args.eval_functions) == len(args.depths) == len(args.gamma):
         raise ValueError("Number of players, evaluation functions, depths and gammas should be the same, non relevant values for different players are ignored")
 
