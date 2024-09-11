@@ -23,7 +23,7 @@ class Game:
     def run(self, display_ui, board_configuration, board_shape):
         self._should_quit = False
         self.board = BoardFactory.get_board(board_configuration, board_shape, len(self.players))
-        self.ui = UIFactory.getUI(display_ui, self.board)
+        self.ui = UIFactory.getUI(display_ui, self.board, len(self.players))
         self.ui.display_initial_message()
         self.ui.display_board(self.board)
         rl_index = self.does_players_contain_rl()

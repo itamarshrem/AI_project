@@ -13,8 +13,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-size', '--board_shape', type=int, nargs=3, required=True, help='size of the board')
     parser.add_argument('-p', '--players', nargs="*", type=str, required=True, choices=["human", "random", "minmax", "alpha_beta", "rl_agent", "baseline"], help='human, random, minmax, alpha_beta, rl_agent, baseline')
-    parser.add_argument('-ef', '--eval_functions', nargs="*", required=True, type=str, choices=["simple", "complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, complex, defensive, offensive, ibef2, none, only_best_opponent')
     num_of_players_inputted = len(parser.parse_known_args()[0].players)
+    parser.add_argument('-ef', '--eval_functions', nargs="*", default=['none'] * num_of_players_inputted, type=str, choices=["simple", "complex",  "defensive", "offensive", "ibef2", "none", 'only_best_opponent'], help='simple, complex, defensive, offensive, ibef2, none, only_best_opponent')
     parser.add_argument('-d', '--depths', type=int, nargs="*", default= [2 * num_of_players_inputted] * num_of_players_inputted, help='Depth of the search tree')
     parser.add_argument('-g', '--gamma', type=float, nargs="*", default=[0] * num_of_players_inputted, help='probability of random action of MultiAgentSearchAgent')
     parser.add_argument('-ws', '--winning_streak', type=int, required=True, help='Number of consecutive pieces to win')
@@ -30,6 +30,7 @@ def parse_args():
 
 def validate_input(args):
     assert len(args.players) > 1, "Number of players should be at least 2"
+    assert len(set(args.players).intersection({'minmax', 'alpha_beta', 'baseline'})) == 0 or len(set(args.eval_functions) - {'none'}) > 0, "Evaluation function should be set for minmax, alpha_beta and baseline players"
     assert np.sum(np.array(args.board_shape) > 1) > 1, "Board shape should have at least 2 dimensions"
     minimum_of_board_shape = min(args.board_shape[0], args.board_shape[1], args.board_shape[2] if args.board_shape[2] > 1 else np.inf)
     assert args.winning_streak <= minimum_of_board_shape, "winning streak should be less than the minimum of the board shape"

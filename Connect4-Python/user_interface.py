@@ -29,13 +29,16 @@ class UI:
     RADIUS = int(SQUARESIZE / 2 - 5)
     PLAYER_COLORS = [Color.RED, Color.YELLOW, Color.MAGENTA, Color.GREEN, Color.ORANGE, Color.PURPLE]
 
-    def __init__(self, board: Board):
+    def __init__(self, board: Board, num_of_players):
         self.width = board.cols * self.SQUARESIZE
         self.height = (board.rows + 1) * self.SQUARESIZE
         self.size = (self.width, self.height)
         pygame.init()
         self.screen = pygame.display.set_mode(self.size)
         self.myfont = pygame.font.SysFont("monospace", 75)
+
+        for i in range(len(self.PLAYER_COLORS), num_of_players):
+            self.PLAYER_COLORS.append((np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255)))
 
     def print_to_screen(self, text):
         label = self.myfont.render(text, 1, Color.RED)
@@ -121,9 +124,9 @@ class UI3D(BaseUI):
 
 class UIFactory:
     @staticmethod
-    def getUI(ui_configuration, board):
+    def getUI(ui_configuration, board, num_of_players):
         if ui_configuration and board.depth > 1:
             return UI3D(board)
         if ui_configuration:
-            return UI(board)
+            return UI(board, num_of_players)
         return EmptyUI()

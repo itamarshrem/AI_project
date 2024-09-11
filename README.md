@@ -27,7 +27,7 @@ Each player can be configured with a different evaluation function, search depth
 ## Command Line Arguments
 - `--board_shape` (`-size`): Specifies the board size (required).
 - `--players` (`-p`): List of players participating in the game (required). Choices include `"human"`, `"random"`, `"minmax"`, `"alpha_beta"`, `"rl_agent"`, and `"baseline"`.
-- `--eval_functions` (`-ef`): Specifies the evaluation function for each player (required). Choices include `"simple"`, `"complex"`, `"defensive"`, `"offensive"`, `"ibef2"`, `"none"`, and `"only_best_opponent"`. (These are relevant for `minmax`, `alpha_beta`, and `baseline` players only).
+- `--eval_functions` (`-ef`): Specifies the evaluation function for each player. Choices include `"simple"`, `"complex"`, `"defensive"`, `"offensive"`, `"ibef2"`, `"none"`, and `"only_best_opponent"`. (These are relevant and needed for `minmax`, `alpha_beta`, and `baseline` players only, the default value is `"none"` for all players).
 - `--depths` (`-d`): Search depth for each player. This is relevant for `minmax` and `alpha_beta` players only, and it has a default value of 2 * number of players for relevant players.
 - `--gamma` (`-g`): Probability of a random action for search agents. This is relevant for `minmax` and `alpha_beta` players only (Gamma=0 is deterministic and it is the default value).
 - `--winning_streak` (`-ws`): Number of consecutive pieces required to win the game (required).
@@ -42,11 +42,11 @@ Each player can be configured with a different evaluation function, search depth
 In order to allow generalization across different player types, all of the following arguments are **required** when running the game:
 - `--board_shape`
 - `--players`
-- `--eval_functions`
 - `--winning_streak`
 - `--num_of_games`
   
 Additional **important note** is that for these arguments:
+- `--eval_functions`
 - `--depths`
 - `--gamma`
   
