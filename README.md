@@ -27,9 +27,9 @@ Each player can be configured with a different evaluation function, search depth
 ## Command Line Arguments
 - `--board_shape` (`-size`): Specifies the board size (required).
 - `--players` (`-p`): List of players participating in the game (required). Choices include `"human"`, `"random"`, `"minmax"`, `"alpha_beta"`, `"rl_agent"`, and `"baseline"`.
-- `--eval_functions` (`-ef`): Specifies the evaluation function for each player (required). Choices include `"simple"`, `"complex"`, `"defensive"`, `"offensive"`, `"ibef2"`, `"none"`, and `"only_best_opponent"`. These are relevant for `minmax`, `alpha_beta`, and `baseline` players only).
-- `--depths` (`-d`): Search depth for each player (required). This is relevant for `minmax` and `alpha_beta` players only.
-- `--gamma` (`-g`): Probability of a random action for search agents (required). This is relevant for `minmax` and `alpha_beta` players only (Gamma=0 is deterministic).
+- `--eval_functions` (`-ef`): Specifies the evaluation function for each player (required). Choices include `"simple"`, `"complex"`, `"defensive"`, `"offensive"`, `"ibef2"`, `"none"`, and `"only_best_opponent"`. (These are relevant for `minmax`, `alpha_beta`, and `baseline` players only).
+- `--depths` (`-d`): Search depth for each player. This is relevant for `minmax` and `alpha_beta` players only, and it has a default value of 2 * number of players for relevant players.
+- `--gamma` (`-g`): Probability of a random action for search agents. This is relevant for `minmax` and `alpha_beta` players only (Gamma=0 is deterministic and it is the default value).
 - `--winning_streak` (`-ws`): Number of consecutive pieces required to win the game (required).
 - `--num_of_games` (`-ng`): Number of consecutive games to be played (required).
 - `--display_screen` (`-ui`): Enables the game UI (optional).
@@ -43,10 +43,14 @@ In order to allow generalization across different player types, all of the follo
 - `--board_shape`
 - `--players`
 - `--eval_functions`
-- `--depths`
-- `--gamma`
 - `--winning_streak`
 - `--num_of_games`
+  
+Additional **important note** is that for these arguments:
+- `--depths`
+- `--gamma`
+  
+when inputed or modified, they must be inputed for all players, even if they are not relevant for some of them (players that do not use them will ignore these values).
 
 However, not all arguments are relevant to every player. For example:
 - **Random players** do not use `depth` or `gamma`, so these values are ignored for them.
