@@ -44,9 +44,7 @@ def complex_evaluation_function_helper(board, player_index, num_of_players, winn
 
     if cur_player_score[0] == (2 ** winning_streak) and cur_player_score[1] > 0:
         cur_player_score[0] = 2 ** (winning_streak + 3)
-
     return cur_player_score[0], cur_player_score[1], max_opponents_streaks, max_opponents_streaks_appearance
-
 
 def complex_evaluation_function(board, player_index, num_of_players, winning_streak):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
