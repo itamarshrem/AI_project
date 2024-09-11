@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from networkx.algorithms.bipartite import color
+
+
 #a function that gets several lists of data and plots them
-def plot_data(data, labels, title, x_label, y_label):
+def plot_data(data, labels, title, x_label, y_label, colors=None):
     #add x axis array, with specific values. for example i want the x values to be 0.6, 0.4, 0.2, 0, and the y values will be the corresponding values in the data lists
     x = np.arange(1, len(data[0]) + 1)
     # plt.xticks(x, [0.6, 0.4, 0.2, 0]) # to run with gammas
@@ -10,9 +13,15 @@ def plot_data(data, labels, title, x_label, y_label):
     for i in range(len(data)):
         #if labels[i] contains the word ibef2, plot it with strips
         if "ibef2" in labels[i]:
-            plt.plot(x, data[i], label=labels[i], linestyle='dashed')
+            if colors is None:
+                plt.plot(x, data[i], label=labels[i], linestyle='dashed')
+            else:
+                plt.plot(x, data[i], label=labels[i], linestyle='dashed', color=colors[i])
         else:
-            plt.plot(x,data[i], label=labels[i])
+            if colors is None:
+                plt.plot(x, data[i], label=labels[i])
+            else:
+                plt.plot(x, data[i], label=labels[i], color=colors[i])
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -42,9 +51,10 @@ def graph_for_depths():
     ibef2_vs_defensive = [89.9, 85.7, 98.2, 92.3, 98.7, 94.5]
     labels = ["offensive vs complex", "defensive vs complex", "offensive vs ibef2", "defensive vs ibef2"]
     data = [complex_vs_offensive, complex_vs_defensive, ibef2_vs_offensive, ibef2_vs_defensive]
+    colors = ['r', 'b', 'r', 'b']
     plot_data(data, labels, "Compare complex and ibef2 heuristics", "depth of the search tree",
-              "percentage of wins(on 1000 games)")
+              "percentage of wins(on 1000 games)", colors)
 
 if __name__ == '__main__':
-    graph_for_gammmas()
+    graph_for_depths()
 
