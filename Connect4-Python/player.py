@@ -112,7 +112,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
     def __min_player(self, cur_state, cur_depth, num_of_players, cur_player_idx, winning_streak):
         legal_actions = cur_state.get_legal_actions(winning_streak)
         if cur_depth == 0 or not legal_actions:
-            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
+            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak, self.depth-cur_depth)
         min_value_found = self.MAX_SCORE
         next_player_index = self.get_next_player(cur_player_idx, num_of_players)
         for action in legal_actions:
@@ -128,7 +128,7 @@ class MinmaxAgent(MultiAgentSearchAgent):
     def __max_player(self, cur_state, cur_depth, num_of_players, winning_streak):
         legal_actions = cur_state.get_legal_actions(winning_streak)
         if cur_depth == 0 or not legal_actions:
-            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
+            return self.evaluation_function(cur_state, self.index, num_of_players, winning_streak, self.depth-cur_depth)
         max_value_found = self.MIN_SCORE
         next_player_index = self.get_next_player(self.index, num_of_players)
         for action in legal_actions:
@@ -157,7 +157,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def __alphabeta_helper(self, cur_state, next_player, cur_depth, a, b, num_of_players, winning_streak):
         legal_actions = cur_state.get_legal_actions(winning_streak)
         if cur_depth == 0 or not legal_actions:
-            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
+            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak, self.depth-cur_depth)
         if next_player == self.index:
             return self.__max_helper(cur_state, next_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak)
         return self.__min_helper(cur_state, next_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak)
@@ -176,7 +176,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     def __min_helper(self, cur_state, cur_player, cur_depth, a, b, num_of_players, legal_actions, winning_streak):
         if cur_depth == 0 or not legal_actions:
-            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak)
+            return None, self.evaluation_function(cur_state, self.index, num_of_players, winning_streak, self.depth-cur_depth)
         min_action = None
         for action in legal_actions:
             successor = cur_state.generate_successor(cur_player, location=action, winning_streak=winning_streak)
@@ -204,12 +204,12 @@ class BaselinePlayer(MultiAgentSearchAgent):
         """
         legal_actions = board.get_legal_actions(winning_streak)
         if not legal_actions:
-            return None, self.evaluation_function(board, self.index, num_of_players, winning_streak)
+            return None, self.evaluation_function(board, self.index, num_of_players, winning_streak, 0)
 
         actions_values = []
         for action in legal_actions:
             successor = board.generate_successor(self.index, location=action, winning_streak=winning_streak)
-            value = self.evaluation_function(successor, self.index, num_of_players, winning_streak)
+            value = self.evaluation_function(successor, self.index, num_of_players, winning_streak, 0)
             actions_values.append(value)
 
         actions_values = np.array(actions_values)
@@ -334,6 +334,7 @@ class PlayerFactory:
     @staticmethod
     def get_player(player_type, index, args):
         evaluation_function = PlayerFactory.get_evaluation_function(args.eval_functions[index])
+        assert player_type != "baseline" or args.eval_functions[index] in ["offensive", "defensive"]
         eval_func_return_depth = 1 if args.eval_functions[index] in {'simple', 'ibef2'} else 2
         if player_type == "random":
             return RandomPlayer(index)

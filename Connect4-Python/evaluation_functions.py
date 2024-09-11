@@ -13,7 +13,7 @@ def update_max_streaks_score(player_streaks, cur_player_index, new_max_score_tup
         player_streaks[cur_player_index][1] = player_streaks[cur_player_index][1] + new_max_score_tuple[1]
 
 
-def complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=False):
+def complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, depth = 0, complex_mode=False):
     players_streaks = {}
     alpha = 1 / (num_of_players - 1)
 
@@ -44,13 +44,11 @@ def complex_evaluation_function_helper(board, player_index, num_of_players, winn
 
     if cur_player_score[0] == (2 ** winning_streak) and cur_player_score[1] > 0:
         cur_player_score[0] = 2 ** (winning_streak + 3)
+    return cur_player_score[0] - (depth / 100), cur_player_score[1], max_opponents_streaks - (depth / 100), max_opponents_streaks_appearance
 
-    return cur_player_score[0], cur_player_score[1], max_opponents_streaks, max_opponents_streaks_appearance
-
-
-def complex_evaluation_function(board, player_index, num_of_players, winning_streak):
+def complex_evaluation_function(board, player_index, num_of_players, winning_streak, depth):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
-        complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=True)
+        complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak, depth, complex_mode=True)
 
     if cur_player_max_streak == (2 ** (winning_streak + 3)) and cur_player_max_streak_app > 0:
         return cur_player_max_streak, cur_player_max_streak_app
@@ -59,7 +57,7 @@ def complex_evaluation_function(board, player_index, num_of_players, winning_str
     return final_score
 
 
-def only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=False):
+def only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, depth, complex_mode=False):
     players_streaks = {}
 
     for direction, conv_res in board.conv_res_by_direction.items():
@@ -86,7 +84,7 @@ def only_best_opponent_evaluation_function_helper(board, player_index, num_of_pl
     return cur_player_score[0], cur_player_score[1], max_opponents_streaks_score[0], max_opponents_streaks_score[0]
 
 
-def only_best_opponent_evaluation_function(board, player_index, num_of_players, winning_streak):
+def only_best_opponent_evaluation_function(board, player_index, num_of_players, winning_streak, depth):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         only_best_opponent_evaluation_function_helper(board, player_index, num_of_players, winning_streak, complex_mode=True)
 
@@ -97,14 +95,14 @@ def only_best_opponent_evaluation_function(board, player_index, num_of_players, 
     return final_score
 
 
-def simple_evaluation_function(board, player_index, num_of_players, winning_streak):
+def simple_evaluation_function(board, player_index, num_of_players, winning_streak, depth):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
     return cur_player_max_streak - max_opponents_streaks
 
 
-def ibef2_evaluation_function(board, player_index, num_of_players, winning_streak):
+def ibef2_evaluation_function(board, player_index, num_of_players, winning_streak, depth):
     assert num_of_players == 2
     cur_streak_sum, opponent_streak_sum = 0, 0
 
@@ -116,14 +114,14 @@ def ibef2_evaluation_function(board, player_index, num_of_players, winning_strea
     return cur_streak_sum - opponent_streak_sum
 
 
-def defensive_evaluation_function(board, player_index, num_of_players, winning_streak):
+def defensive_evaluation_function(board, player_index, num_of_players, winning_streak, depth):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
     return -combine_scores(max_opponents_streaks, max_opponents_streaks_app)
 
 
-def offensive_evaluation_function(board, player_index, num_of_players, winning_streak):
+def offensive_evaluation_function(board, player_index, num_of_players, winning_streak, depth):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
         complex_evaluation_function_helper(board, player_index, num_of_players, winning_streak)
 
