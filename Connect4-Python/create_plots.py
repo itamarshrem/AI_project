@@ -12,16 +12,17 @@ def plot_data(data, labels, title, x_label, y_label, colors=None):
 
     for i in range(len(data)):
         #if labels[i] contains the word ibef2, plot it with strips
-        if "ibef2" in labels[i]:
-            if colors is None:
-                plt.plot(x, data[i], label=labels[i], linestyle='dashed')
-            else:
-                plt.plot(x, data[i], label=labels[i], linestyle='dashed', color=colors[i])
+        # if "ibef2" in labels[i]:
+        #     if colors is None:
+        #         plt.plot(x, data[i], label=labels[i], linestyle='dashed')
+        #     else:
+        #         plt.plot(x, data[i], label=labels[i], linestyle='dashed', color=colors[i])
+        # else:
+        if colors is None:
+            plt.plot(x, data[i], label=labels[i])
         else:
-            if colors is None:
-                plt.plot(x, data[i], label=labels[i])
-            else:
-                plt.plot(x, data[i], label=labels[i], color=colors[i])
+            plt.plot(x, data[i], label=labels[i], color=colors[i])
+
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -44,17 +45,23 @@ def graph_for_gammmas():
     plot_data(data, labels, "performance against baseline players", "probability to random action",
               "percentage of wins(on 100 games)")
 
-def graph_for_depths():
+def graph_for_depths1():
     complex_vs_offensive = [95.1, 95.2, 99.0, 99.9, 99.9, 99.9]
-    complex_vs_defensive = [86.3, 95.5, 93.1, 98.1, 96.4, 98.8]
     ibef2_vs_offensive = [83.1, 76.5, 97.5, 81.8, 98.5, 85.2]
+    labels = ["offensive vs complex", "offensive vs ibef2"]
+    data = [complex_vs_offensive, ibef2_vs_offensive]
+    plot_data(data, labels, "Compare complex and ibef2 heuristics vs offensive", "depth of the search tree",
+              "percentage of wins (on 1000 games)")
+
+def graph_for_depths2():
+    complex_vs_defensive = [86.3, 95.5, 93.1, 98.1, 96.4, 98.8]
     ibef2_vs_defensive = [89.9, 85.7, 98.2, 92.3, 98.7, 94.5]
-    labels = ["offensive vs complex", "defensive vs complex", "offensive vs ibef2", "defensive vs ibef2"]
-    data = [complex_vs_offensive, complex_vs_defensive, ibef2_vs_offensive, ibef2_vs_defensive]
-    colors = ['r', 'b', 'r', 'b']
-    plot_data(data, labels, "Compare complex and ibef2 heuristics", "depth of the search tree",
-              "percentage of wins(on 1000 games)", colors)
+    labels = ["defensive vs complex", "defensive vs ibef2"]
+    data = [complex_vs_defensive, ibef2_vs_defensive]
+    plot_data(data, labels, "Compare complex and ibef2 heuristics vs defensive", "depth of the search tree",
+              "percentage of wins (on 1000 games)")
 
 if __name__ == '__main__':
-    graph_for_depths()
+    graph_for_depths1()
+    graph_for_depths2()
 
