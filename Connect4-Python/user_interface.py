@@ -16,7 +16,7 @@ class Color:
     PURPLE = (128, 0, 128)
 
 class BaseUI:
-    def print_to_screen(self, board):
+    def print_to_screen(self, msg, player_index):
         raise NotImplementedError
 
     def display_board(self, board):
@@ -37,8 +37,8 @@ class UI:
         self.screen = pygame.display.set_mode(self.size)
         self.myfont = pygame.font.SysFont("monospace", 75)
 
-    def print_to_screen(self, text):
-        label = self.myfont.render(text, 1, Color.RED)
+    def print_to_screen(self, text, player_index):
+        label = self.myfont.render(text, 1, UI.PLAYER_COLORS[player_index])
         self.screen.blit(label, (40, 10))
         pygame.display.update()
         pygame.time.wait(3000)
@@ -86,7 +86,7 @@ class EmptyUI(BaseUI):
     def __init__(self):
         pass
 
-    def print_to_screen(self, board):
+    def print_to_screen(self, msg, player_index):
         pass
     def display_board(self, board):
         pass
@@ -116,8 +116,8 @@ class UI3D(BaseUI):
             input_str = input("Enter column and depth, seperated by coma: ")
         column, depth = input_str.replace(" ", "").split(",")
         return np.array([int(column), int(depth)])
-    def print_to_screen(self, result):
-        print(result)
+    def print_to_screen(self, msg, player_index):
+        print(msg)
 
 class UIFactory:
     @staticmethod

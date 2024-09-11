@@ -36,9 +36,11 @@ class Game:
 
     def display_result_in_ui(self, result):
         if result == self.TIE:
-            self.ui.print_to_screen("It's a tie!")
+            msg = "It's a tie!"
+            result = 0
         else:
-            self.ui.print_to_screen(f"Player {result} wins!")
+            msg = f"Player {result} wins!"
+        self.ui.print_to_screen(msg, player_index=result)
 
 
     def _game_loop(self):
