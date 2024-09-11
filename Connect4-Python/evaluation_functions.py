@@ -36,15 +36,15 @@ def complex_evaluation_function_helper(board, player_index, num_of_players, winn
     while next_player_index != player_index:
         max_opponent_streaks, max_opponent_streaks_appearance = players_streaks[next_player_index]
         if max_opponent_streaks == (2 ** winning_streak) and max_opponent_streaks_appearance > 0:
-            max_opponent_streaks = 2 ** (winning_streak + 3)
+            max_opponent_streaks = 2 ** (winning_streak + 3) - (depth / 100)
         max_opponents_streaks += alpha * max_opponent_streaks
         if max_opponent_streaks == cur_player_score[0] or not complex_mode:
             max_opponents_streaks_appearance += max_opponent_streaks_appearance
         next_player_index = (next_player_index + 1) % num_of_players
 
     if cur_player_score[0] == (2 ** winning_streak) and cur_player_score[1] > 0:
-        cur_player_score[0] = 2 ** (winning_streak + 3)
-    return cur_player_score[0] - (depth / 100), cur_player_score[1], max_opponents_streaks - (depth / 100), max_opponents_streaks_appearance
+        cur_player_score[0] = 2 ** (winning_streak + 3) - (depth / 100)
+    return cur_player_score[0], cur_player_score[1], max_opponents_streaks, max_opponents_streaks_appearance
 
 def complex_evaluation_function(board, player_index, num_of_players, winning_streak, depth):
     cur_player_max_streak, cur_player_max_streak_app, max_opponents_streaks, max_opponents_streaks_app = \
