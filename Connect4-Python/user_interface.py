@@ -88,7 +88,7 @@ class EmptyUI(BaseUI):
     def __init__(self):
         pass
 
-    def print_to_screen(self, board):
+    def print_to_screen(self, msg, player_index):
         pass
     def display_board(self, board):
         pass

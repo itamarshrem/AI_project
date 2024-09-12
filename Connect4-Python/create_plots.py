@@ -9,7 +9,7 @@ def plot_data(data, labels, title, x_label, y_label, colors=None):
     x = np.arange(1, len(data[0]) + 1)
     # plt.xticks(x, [0.6, 0.4, 0.2, 0]) # to run with gammas
     #plot each list of data with the corresponding label
-
+    min_y , max_y = 0, 100
     for i in range(len(data)):
         #if labels[i] contains the word ibef2, plot it with strips
         # if "ibef2" in labels[i]:
@@ -22,7 +22,7 @@ def plot_data(data, labels, title, x_label, y_label, colors=None):
             plt.plot(x, data[i], label=labels[i])
         else:
             plt.plot(x, data[i], label=labels[i], color=colors[i])
-
+    plt.ylim(min_y, max_y)
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
