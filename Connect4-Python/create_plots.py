@@ -9,7 +9,6 @@ def plot_data(data, labels, title, x_label, y_label, colors=None):
     x = np.arange(1, len(data[0]) + 1)
     # plt.xticks(x, [0.6, 0.4, 0.2, 0]) # to run with gammas
     #plot each list of data with the corresponding label
-    min_y , max_y = 0, 100
     for i in range(len(data)):
         #if labels[i] contains the word ibef2, plot it with strips
         # if "ibef2" in labels[i]:
@@ -22,7 +21,6 @@ def plot_data(data, labels, title, x_label, y_label, colors=None):
             plt.plot(x, data[i], label=labels[i])
         else:
             plt.plot(x, data[i], label=labels[i], color=colors[i])
-    plt.ylim(min_y, max_y)
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -54,7 +52,7 @@ def graph_for_depths1():
               "percentage of wins (on 1000 games)")
 
 def graph_for_depths2():
-    complex_vs_defensive = [86.3, 95.5, 93.1, 98.1, 96.4, 98.8]
+    complex_vs_defensive = [86.3, 95.5, 95.2, 98.1, 98.4, 98.8]
     ibef2_vs_defensive = [89.9, 85.7, 98.2, 92.3, 98.7, 94.5]
     labels = ["defensive vs complex", "defensive vs ibef2"]
     data = [complex_vs_defensive, ibef2_vs_defensive]
