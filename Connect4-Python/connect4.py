@@ -5,7 +5,6 @@ from game import Game
 from player import PlayerFactory
 from winning_patterns import WinningPatterns
 import utils
-from create_plots import plot_data
 
 
 def parse_args():
@@ -56,7 +55,6 @@ def print_results(results, num_of_games, game):
 
 
 def run_all_games(num_of_games, game, display_screen, board_configuration, board_shape, rl_currently_learning):
-    victories = []
     results = defaultdict(lambda: 0)
     for i in range(num_of_games):
         start_time = time.time()
@@ -64,15 +62,7 @@ def run_all_games(num_of_games, game, display_screen, board_configuration, board
         results[game_result] += 1
         print(f"player {game.players[game_result].__name__()} with index {game_result} won the game. winning percentage: {results[game_result] * 100 / (i + 1)}%")
         print(f"game {i + 1}: time taken: {time.time() - start_time} seconds")
-        if game.players[game_result].__name__() == "QLearningPlayer":
-            victories.append(1)
-        else:
-            victories.append(0)
-    if rl_currently_learning:
-        np_victories = np.array(victories)
-        np_victories = (np.cumsum(np_victories) * 100) / np.arange(1, num_of_games + 1)
-        plot_data([np_victories], ["rl agent"], "RL agent winning percentage during training", "game number",
-                  "percentage of winning so far")
+
 
     print_results(results, num_of_games, game)
     for player in game.players:
