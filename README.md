@@ -79,23 +79,23 @@ Run a single game between a human player and an Alpha-Beta agent using a complex
    python Connect4-Python/connect4.py --board_shape 6 7 1 --players human alpha_beta --eval_functions none complex --depths 1 4 --winning_streak 4 --num_of_games 1 -ui
    ```
 
-
 **RL Agent vs Complex Agent(Depth = 2, Gamma = 0.2)**
-
 Test the RL agent trained earlier against a Complex Agent with depth 2 and probability of 0.2 to make a random move.
 
    ```bash
    python Connect4-Python/connect4.py --board_shape 6 7 1 --players rl_agent alpha_beta --eval_functions none complex --depths 1 2 --gamma 0 0.2 --winning_streak 4 --num_of_games 1000 --load_rl_agent
    ```
+The Q-Table is quite large and it might take a while to load the RL agent.
 
 **RL Agent vs Human**
-
+The Q-Table is quite large and it might take a while to load the RL agent.
 Test the RL agent trained earlier against human. notice that the Rl agent we provided you was trained as the first player.
 If you want to test it as the second player you need to train it again as the second player.
 
    ```bash
    python Connect4-Python/connect4.py --board_shape 6 7 1 --players rl_agent human --eval_functions none none  --winning_streak 4 --num_of_games 1 -ui --load_rl_agent
    ```
+The Q-Table is quite large and it might take a while to load the RL agent.
 
 ### 3D Board (Console Interface)
 The game also supports 3D board configurations for Connect 4, where the board has multiple depths. When using a 3D board:

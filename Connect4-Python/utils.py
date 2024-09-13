@@ -20,9 +20,9 @@ def get_rl_agent_save_path(winning_streak, board_shape, ql_index, num_of_players
 
 def extract_files_from_zip(winning_streak, board_shape, index, num_of_players):
     full_path_filename = get_rl_agent_save_path(winning_streak, board_shape, index, num_of_players)
-    zip_filename = full_path_filename + ".zip"
-    if not os.path.exists(zip_filename):
+    if os.path.exists(full_path_filename):
         return
+    zip_filename = full_path_filename + ".zip"
     with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
         zip_ref.extractall(find_q_tables_dir())
 
