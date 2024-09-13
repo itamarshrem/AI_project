@@ -297,7 +297,7 @@ class QLearningPlayer(Player):
             number_of_steps = np.ceil(np.sum(board_after_opponents.board != -1) / self.num_of_players)
             return -500 + number_of_steps
         if board_after_rl.is_board_full() or board_after_opponents.is_board_full():
-            return 200
+            return -200
         return -1
 
 
