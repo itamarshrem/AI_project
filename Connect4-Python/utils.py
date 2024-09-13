@@ -1,7 +1,6 @@
 import os
 import zipfile
 import pickle
-import torch
 
 def find_q_tables_dir():
     current_directory = os.getcwd()
@@ -42,17 +41,3 @@ def zip_rl_agent_qtable(file_name):
         zip_file.write(file_name, arcname=base_name, compress_type=zipfile.ZIP_DEFLATED)
 
 
-def board_to_one_hot_board(board, game_board_shape, num_of_players):
-    rows, cols = game_board_shape[0], game_board_shape[1]
-    one_hot_board = torch.zeros((num_of_players, rows, cols))
-    for i in range(num_of_players):
-        one_hot_board[i, ...] = (board == i).to(torch.int8)
-    return one_hot_board
-
-def pre_process_board(game_board, game_board_shape, num_of_players):
-    """
-    the parameter game_board can be tuple or np.array
-    """
-    rows, cols = game_board_shape[0], game_board_shape[1]
-    board = torch.tensor(game_board).reshape((rows, cols))
-    return board_to_one_hot_board(board, game_board_shape, num_of_players)
