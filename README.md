@@ -55,12 +55,20 @@ when inputed or modified, they must be inputed for all players, even if they are
 
 
 ## Example Commands
+**Complecx Agent(Depth = 6) vs Offensive Agent vs Random Agent**
+
+Run 100 games between an Alpha-Beta with the complex heuristic, a baseline player using the offensive evaluation function, and a random player.
+   
+   ```bash
+   python Connect4-Python/connect4.py -size 6 7 1 -p alpha_beta baseline random -ef complex offensive none --depths 3 0 0  --winning_streak 4 --num_of_games 100
+   ```
+
 **Complex Agent(Depth = 4) vs Offensive Agent**
 
 Run 100 games between an Alpha-Beta with the complex heuristic and a baseline player using the offensive evaluation function.
    
    ```bash
-   python Connect4-Python/connect4_game.py --board_shape 6 7 1 --players alpha_beta baseline --eval_functions complex offensive  --depths 4 1 --winning_streak 4 --num_of_games 100
+   python Connect4-Python/connect4.py --board_shape 6 7 1 --players alpha_beta baseline --eval_functions complex offensive  --depths 4 1 --winning_streak 4 --num_of_games 100
    ```
 
 **Human vs Complex Agent (Depth = 6)**
@@ -68,7 +76,7 @@ Run 100 games between an Alpha-Beta with the complex heuristic and a baseline pl
 Run a single game between a human player and an Alpha-Beta agent using a complex evaluation function, in depth 2.
 
    ```bash
-   python Connect4-Python/connect4_game.py --board_shape 6 7 1 --players human alpha_beta --eval_functions none complex --depths 1 4 --winning_streak 4 --num_of_games 1 -ui
+   python Connect4-Python/connect4.py --board_shape 6 7 1 --players human alpha_beta --eval_functions none complex --depths 1 4 --winning_streak 4 --num_of_games 1 -ui
    ```
 
 
@@ -77,7 +85,7 @@ Run a single game between a human player and an Alpha-Beta agent using a complex
 Test the RL agent trained earlier against a Complex Agent with depth 2 and probability of 0.2 to make a random move.
 
    ```bash
-   python Connect4-Python/connect4_game.py --board_shape 6 7 1 --players rl_agent alpha_beta --eval_functions none complex --depths 1 2 --gamma 0 0.2 --winning_streak 4 --num_of_games 1000 --load_rl_agent
+   python Connect4-Python/connect4.py --board_shape 6 7 1 --players rl_agent alpha_beta --eval_functions none complex --depths 1 2 --gamma 0 0.2 --winning_streak 4 --num_of_games 1000 --load_rl_agent
    ```
 
 **RL Agent vs Human**
@@ -86,7 +94,7 @@ Test the RL agent trained earlier against human. notice that the Rl agent we pro
 If you want to test it as the second player you need to train it again as the second player.
 
    ```bash
-   python Connect4-Python/connect4_game.py --board_shape 6 7 1 --players rl_agent human --eval_functions none none  --winning_streak 4 --num_of_games 1 -ui --load_rl_agent
+   python Connect4-Python/connect4.py --board_shape 6 7 1 --players rl_agent human --eval_functions none none  --winning_streak 4 --num_of_games 1 -ui --load_rl_agent
    ```
 
 ### 3D Board (Console Interface)
@@ -98,7 +106,7 @@ The game also supports 3D board configurations for Connect 4, where the board ha
 
 For running with a 3D board configuration (console-based):
    ```bash
-   python Connect4-Python/connect4_game.py --board_shape 6 7 5 --players baseline human --eval_functions defensive none --winning_streak 4 --num_of_games 1 -ui
+   python Connect4-Python/connect4.py --board_shape 6 7 5 --players baseline human --eval_functions defensive none --winning_streak 4 --num_of_games 1 -ui
    ```
 
 

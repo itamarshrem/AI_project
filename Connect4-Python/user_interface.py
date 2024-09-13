@@ -113,10 +113,10 @@ class UI3D(BaseUI):
     def display_board(self, board):
         print(board)
     def get_player_input(self, player_index):
-        input_str = input("Enter column and depth, seperated by coma: ")
+        input_str = input("Enter column and depth, seperated by comma: ")
         input_arr = input_str.replace(" ", "").split(",")
         while len(input_arr) != 2 or not (input_arr[0].isdigit() and input_arr[1].isdigit()):
-            input_str = input("Enter column and depth, seperated by coma: ")
+            input_str = input("You entered an invalid input. Enter column and depth, seperated by comma: ")
             input_arr = input_str.replace(" ", "").split(",")
         column, depth = input_arr[0], input_arr[1]
         return np.array([int(column), int(depth)])
