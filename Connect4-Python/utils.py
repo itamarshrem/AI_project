@@ -10,29 +10,22 @@ def find_q_tables_dir():
     return os.path.join(connect_four_dir, "q_tables_for_rl_agents")
 
 
-def create_qtable_filename(winning_streak, board_shape, ql_index):
-    return f"qlearning_player_ws_{winning_streak}_players_2_shape_{board_shape}_index_{ql_index}.pkl"
+def create_qtable_filename(winning_streak, board_shape, ql_index, num_of_players):
+    return f"qlearning_player_ws_{winning_streak}_players_{num_of_players}_shape_{board_shape}_index_{ql_index}.pkl"
 
 
-def get_rl_agent_save_path(winning_streak, board_shape, ql_index):
-    file_name = create_qtable_filename(winning_streak, board_shape, ql_index)
+def get_rl_agent_save_path(winning_streak, board_shape, ql_index, num_of_players):
+    file_name = create_qtable_filename(winning_streak, board_shape, ql_index, num_of_players)
     return os.path.join(find_q_tables_dir(), file_name)
 
 
-def extract_files_from_zip(winning_streak, board_shape, index):
-    full_path_filename = get_rl_agent_save_path(winning_streak, board_shape, index)
-    if os.path.isfile(full_path_filename):
-        return
-    target_filename = create_qtable_filename(winning_streak, board_shape, index)
+def extract_files_from_zip(winning_streak, board_shape, index, num_of_players):
+    full_path_filename = get_rl_agent_save_path(winning_streak, board_shape, index, num_of_players)
     zip_filename = full_path_filename + ".zip"
-    zip_directory = os.path.dirname(os.path.abspath(zip_filename))
-    target_path = os.path.join(zip_directory, target_filename)
-    with zipfile.ZipFile(zip_filename, 'r') as zip_file:
-        for file_info in zip_file.infolist():
-            if os.path.basename(file_info.filename) == target_filename:
-                with zip_file.open(file_info.filename) as source_file:
-                    with open(target_path, 'wb') as target_file:
-                        target_file.write(source_file.read())
+    if not os.path.exists(zip_filename):
+        return
+    with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
+        zip_ref.extractall(find_q_tables_dir())
 
 def get_qtable_from_file(full_path_filename):
     with open(full_path_filename, 'rb') as file_object:
@@ -45,7 +38,8 @@ def save_rl_agent_qtable(file_name, rl_agent):
 def zip_rl_agent_qtable(file_name):
     zip_filename = file_name + ".zip"
     with zipfile.ZipFile(zip_filename, 'w') as zip_file:
-        zip_file.write(file_name, compress_type=zipfile.ZIP_DEFLATED)
+        base_name = os.path.basename(file_name)
+        zip_file.write(file_name, arcname=base_name, compress_type=zipfile.ZIP_DEFLATED)
 
 
 def board_to_one_hot_board(board, game_board_shape, num_of_players):
