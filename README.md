@@ -55,7 +55,7 @@ when inputed or modified, they must be inputed for all players, even if they are
 
 
 ## Example Commands
-**Complecx Agent(Depth = 6) vs Offensive Agent vs Random Agent**
+**Complex Agent(Depth = 3) vs Offensive Agent vs Random Agent**
 
 Run 100 games between an Alpha-Beta with the complex heuristic, a baseline player using the offensive evaluation function, and a random player.
    
