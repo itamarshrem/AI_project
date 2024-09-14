@@ -89,6 +89,9 @@ The Q-Table is quite large and it might take a while to load the RL agent.
 
 **RL Agent vs Human**
 The Q-Table is quite large and it might take a while to load the RL agent.
+In a change of the last minute, we decided to provide you with RL agent that was trained for 100000 games (instead of 400000 games), to significantly shorten the time the Q_table is uploaded to the RAM.
+The performance of the new agent quite close to the original one.
+
 Test the RL agent trained earlier against human. notice that the Rl agent we provided you was trained as the first player.
 If you want to test it as the second player you need to train it again as the second player.
 
